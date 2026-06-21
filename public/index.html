@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>Bing</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bdr:#222;--acc:#7F77DD;--grn:#1D9E75;--red:#E24B4A;--txt:#fff;--txt2:#aaa;--txt3:#555;}
+html,body{height:100%;background:#000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden;}
+
+/* ─── MOBILE: phone frame ─── */
+body{display:flex;justify-content:center;align-items:center;}
+.app{width:360px;height:780px;background:var(--bg);border-radius:40px;border:2px solid #2a2a2a;overflow:hidden;display:flex;flex-direction:column;position:relative;}
+
+/* ─── PC: full screen ─── */
+@media(min-width:860px){
+  body{display:block;}
+  .app{width:100vw;height:100vh;border-radius:0;border:none;flex-direction:column;}
+}
+
+/* ═══ TOP HEADER ═══ */
+.top-nav{background:var(--bg2);border-bottom:0.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 14px;flex-shrink:0;height:52px;}
+.logo{font-size:20px;font-weight:800;color:#fff;letter-spacing:-1px;}
+.logo span{color:var(--acc);}
+.nav-right{display:flex;align-items:center;gap:6px;}
+.nav-icon-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;}
+.nav-icon-btn i{font-size:22px;color:var(--txt2);}
+.plus-btn{background:var(--acc);border:none;cursor:pointer;padding:7px 12px;border-radius:10px;display:flex;align-items:center;gap:5px;}
+.plus-btn i{font-size:18px;color:#fff;}
+.plus-btn span{font-size:13px;color:#fff;font-weight:600;}
+
+/* ═══ BOTTOM NAV ═══ */
+.bottom-nav{background:var(--bg2);border-top:0.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-around;padding:6px 0 14px;flex-shrink:0;}
+.bottom-nav .nav-tab{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:6px 14px;border-radius:10px;}
+.bottom-nav .nav-tab i{font-size:24px;color:var(--txt3);}
+.bottom-nav .nav-tab.active i{color:#fff;}
+.bottom-nav .nav-tab-lbl{font-size:10px;color:var(--txt3);font-weight:600;}
+.bottom-nav .nav-tab.active .nav-tab-lbl{color:#fff;}
+.bottom-nav .s-badge{background:var(--txt3);color:#000;font-size:10px;font-weight:800;border-radius:5px;padding:2px 6px;}
+.bottom-nav .nav-tab.active .s-badge{background:#fff;color:#000;}
+.bottom-nav .chat-badge{background:var(--grn);color:#fff;font-size:9px;font-weight:700;border-radius:5px;padding:2px 5px;}
+@media(min-width:860px){
+  .bottom-nav{padding:10px 0;}
+  .bottom-nav .nav-tab{padding:8px 24px;}
+}
+
+/* ═══ CONTENT ═══ */
+.content{flex:1;overflow:hidden;position:relative;}
+.tab{display:none;height:100%;flex-direction:column;overflow:hidden;}
+.tab.active{display:flex;}
+
+/* ═══ BING TAB ═══ */
+.bing-feed{flex:1;overflow-y:auto;}
+.bing-feed::-webkit-scrollbar{width:5px;}
+.bing-feed::-webkit-scrollbar-thumb{background:var(--bg3);}
+.empty-feed{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;padding:30px;}
+.empty-feed i{font-size:56px;color:var(--txt3);}
+.empty-feed-title{color:#fff;font-size:17px;font-weight:700;text-align:center;}
+.empty-feed-sub{color:var(--txt3);font-size:13px;text-align:center;line-height:1.6;}
+.empty-feed-btn{background:var(--acc);border:none;color:#fff;font-size:13px;font-weight:600;padding:11px 24px;border-radius:20px;cursor:pointer;margin-top:4px;}
+/* Video cards (user-uploaded) */
+.vid-grid{padding:8px;}
+@media(min-width:860px){.vid-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;padding:16px;}}
+.vid-card{background:var(--bg2);border-radius:10px;overflow:hidden;cursor:pointer;margin-bottom:8px;transition:background .15s;}
+.vid-card:hover{background:var(--bg3);}
+@media(min-width:860px){.vid-card{margin-bottom:0;}}
+.vid-thumb{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;background:var(--bg3);}
+.vid-thumb-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.vid-thumb-play i{font-size:36px;color:rgba(255,255,255,0.5);}
+.vid-dur{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.8);color:#fff;font-size:10px;padding:2px 5px;border-radius:3px;}
+.vid-info{padding:10px 12px 12px;}
+.vid-title{color:#fff;font-size:13px;font-weight:500;line-height:1.4;}
+.vid-ch-row{display:flex;align-items:center;gap:7px;margin-top:6px;cursor:pointer;}
+.vid-ch-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;}
+.vid-ch-name{color:var(--txt3);font-size:11px;}
+.vid-meta{color:var(--txt3);font-size:11px;margin-top:2px;}
+
+/* ═══ WATCH SCREEN ═══ */
+.watch-screen{position:absolute;inset:0;background:var(--bg);z-index:20;display:none;flex-direction:column;overflow:hidden;}
+.watch-screen.open{display:flex;}
+.watch-topbar{background:var(--bg2);padding:8px 12px;border-bottom:0.5px solid var(--bdr);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.watch-topbar-title{color:#fff;font-size:14px;font-weight:600;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.back-btn{background:none;border:none;color:#fff;cursor:pointer;padding:4px;flex-shrink:0;}
+.back-btn i{font-size:22px;}
+.watch-video{width:100%;aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden;}
+.watch-progress{height:3px;background:rgba(255,255,255,0.15);cursor:pointer;flex-shrink:0;}
+.watch-progress-fill{height:100%;background:var(--red);width:0%;transition:width .1s;}
+.watch-ctrls{display:flex;align-items:center;gap:12px;padding:8px 12px;flex-shrink:0;border-bottom:0.5px solid var(--bdr);}
+.watch-ctrls i{color:var(--txt2);font-size:20px;cursor:pointer;}
+.watch-time{color:var(--txt3);font-size:11px;margin-left:auto;}
+.watch-body{flex:1;overflow:hidden;display:flex;}
+.watch-main{flex:1;overflow-y:auto;}
+.watch-main::-webkit-scrollbar{width:5px;}
+.watch-main::-webkit-scrollbar-thumb{background:var(--bg3);}
+.watch-sidebar{display:none;width:300px;min-width:300px;border-left:0.5px solid var(--bdr);overflow-y:auto;padding:14px;}
+@media(min-width:860px){.watch-sidebar{display:block;}.watch-video{max-height:54vh;}}
+.watch-info{padding:12px 14px 6px;}
+.watch-title{color:#fff;font-size:14px;font-weight:600;line-height:1.5;}
+.watch-meta{color:var(--txt3);font-size:12px;margin-top:4px;}
+.watch-ch-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:0.5px solid var(--bdr);border-bottom:0.5px solid var(--bdr);}
+.w-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;}
+.w-ch{flex:1;cursor:pointer;}
+.w-ch-name{color:#fff;font-size:13px;font-weight:600;}
+.w-ch-subs{color:var(--txt3);font-size:11px;}
+.w-sub-btn{background:var(--acc);border:none;color:#fff;font-size:12px;font-weight:600;padding:7px 14px;border-radius:20px;cursor:pointer;}
+.watch-acts{display:flex;justify-content:space-around;padding:8px 14px;border-bottom:0.5px solid var(--bdr);}
+.w-act{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+.w-act i{font-size:20px;color:var(--txt2);}
+.w-act span{font-size:10px;color:var(--txt3);}
+.watch-comments{padding:12px 14px;}
+.cmt-empty{color:var(--txt3);font-size:13px;text-align:center;padding:24px 0;}
+.cmt-add{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.cmt-add-inp{flex:1;background:var(--bg3);border:0.5px solid var(--bdr);border-radius:20px;padding:9px 14px;color:#fff;font-size:13px;outline:none;}
+.cmt-add-inp::placeholder{color:var(--txt3);}
+.cmt-add-btn{background:var(--acc);border:none;color:#fff;padding:9px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;}
+.cmt-item{display:flex;gap:8px;margin-bottom:12px;}
+.cmt-av{width:28px;height:28px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.cmt-name{color:#fff;font-size:11px;font-weight:600;margin-bottom:2px;}
+.cmt-text{color:var(--txt2);font-size:12px;line-height:1.4;}
+
+/* ═══ CHANNEL SCREEN ═══ */
+.ch-screen{position:absolute;inset:0;background:var(--bg);z-index:30;display:none;flex-direction:column;overflow:hidden;}
+.ch-screen.open{display:flex;}
+.ch-topbar{background:var(--bg2);padding:8px 12px;border-bottom:0.5px solid var(--bdr);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.ch-topbar-title{color:#fff;font-size:15px;font-weight:700;flex:1;}
+.ch-body{flex:1;overflow-y:auto;}
+.ch-body::-webkit-scrollbar{width:5px;}
+.ch-body::-webkit-scrollbar-thumb{background:var(--bg3);}
+.ch-banner{width:100%;height:90px;display:flex;align-items:center;justify-content:center;}
+.ch-info-row{display:flex;align-items:center;gap:12px;padding:12px 14px;}
+.ch-big-av{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;}
+.ch-details{flex:1;}
+.ch-name{color:#fff;font-size:16px;font-weight:700;}
+.ch-handle{color:var(--txt3);font-size:12px;margin-top:2px;}
+.ch-stats{color:var(--txt3);font-size:11px;margin-top:3px;}
+.ch-sub-btn{background:var(--acc);border:none;color:#fff;font-size:12px;font-weight:600;padding:8px 16px;border-radius:20px;cursor:pointer;}
+.ch-tabs{display:flex;border-bottom:0.5px solid var(--bdr);}
+.ch-tab{flex:1;padding:10px 0;text-align:center;font-size:12px;font-weight:600;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;}
+.ch-tab.active{color:#fff;border-bottom-color:#fff;}
+.ch-pane{padding:10px;}
+.ch-vid-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(min-width:860px){.ch-vid-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));}}
+.ch-vid-item{cursor:pointer;}
+.ch-vid-thumb{aspect-ratio:16/9;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;margin-bottom:6px;position:relative;overflow:hidden;}
+.ch-vid-dur{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.8);color:#fff;font-size:9px;padding:1px 4px;border-radius:3px;}
+.ch-vid-title{color:#fff;font-size:11px;font-weight:500;line-height:1.3;}
+.ch-vid-views{color:var(--txt3);font-size:10px;margin-top:2px;}
+
+/* ═══ SHORTS TAB ═══ */
+.shorts-wrap{flex:1;position:relative;overflow:hidden;background:#000;display:flex;justify-content:center;align-items:center;}
+.short-empty{display:flex;flex-direction:column;align-items:center;gap:14px;padding:30px;}
+.short-empty i{font-size:56px;color:var(--txt3);}
+.short-empty-title{color:#fff;font-size:17px;font-weight:700;text-align:center;}
+.short-empty-sub{color:var(--txt3);font-size:13px;text-align:center;line-height:1.6;}
+.short-player{position:absolute;inset:0;display:flex;justify-content:center;}
+.short-slide{position:relative;width:100%;height:100%;}
+@media(min-width:860px){.short-slide{width:400px;}}
+.s-bg{position:absolute;inset:0;}
+.s-grad{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,0.88) 0%,rgba(0,0,0,0.06) 45%,rgba(0,0,0,0.35) 100%);}
+.s-center-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.s-center-play i{font-size:56px;color:rgba(255,255,255,0.1);}
+.s-right{position:absolute;right:10px;bottom:80px;display:flex;flex-direction:column;gap:18px;align-items:center;}
+.s-act{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+.s-act i{font-size:26px;color:#fff;}
+.s-act span{font-size:10px;color:#ccc;}
+.s-av-ring{width:38px;height:38px;border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.s-bottom{position:absolute;bottom:0;left:0;right:64px;padding:10px 12px;}
+.s-user-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.s-uname{color:#fff;font-size:13px;font-weight:700;}
+.s-follow-btn{background:transparent;border:1.5px solid #fff;color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;cursor:pointer;}
+.s-caption{color:#ddd;font-size:12px;line-height:1.5;}
+.s-tags{color:var(--acc);font-size:11px;margin-top:3px;}
+.s-prog-bar{height:2px;background:rgba(255,255,255,0.2);position:absolute;bottom:0;left:0;right:0;}
+.s-prog-fill{height:100%;background:#fff;transition:width .12s linear;}
+.shorts-topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px 14px;z-index:5;}
+.shorts-topbar span{color:#fff;font-size:15px;font-weight:700;}
+.shorts-topbar-icons{display:flex;gap:14px;}
+.shorts-topbar-icons i{color:#fff;font-size:22px;cursor:pointer;}
+.swipe-hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.3);font-size:11px;text-align:center;pointer-events:none;animation:bounce 2s infinite;}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-6px);}}
+
+/* ═══ CHATBING TAB ═══ */
+.chat-wrap{flex:1;display:flex;overflow:hidden;}
+.chat-friend-col{display:flex;flex-direction:column;background:var(--bg);width:100%;flex-shrink:0;}
+@media(min-width:860px){.chat-friend-col{width:300px;min-width:300px;border-right:0.5px solid var(--bdr);}}
+.chat-conv-col{display:none;flex:1;flex-direction:column;background:var(--bg);}
+@media(min-width:860px){.chat-conv-col{display:flex;}}
+.chat-hdr{background:var(--bg2);padding:10px 14px;border-bottom:0.5px solid var(--bdr);flex-shrink:0;}
+.chat-title-row{display:flex;align-items:center;justify-content:space-between;}
+.chat-title{color:#fff;font-size:16px;font-weight:700;}
+.chat-hdr-icons{display:flex;gap:14px;}
+.chat-hdr-icons i{color:var(--txt2);font-size:21px;cursor:pointer;}
+.chat-search{background:var(--bg3);border:0.5px solid var(--bdr);border-radius:20px;padding:7px 12px;display:flex;align-items:center;gap:8px;margin-top:8px;}
+.chat-search i{color:var(--txt3);font-size:15px;}
+.chat-search span{color:var(--txt3);font-size:13px;}
+.friend-list{flex:1;overflow-y:auto;}
+.friend-list::-webkit-scrollbar{display:none;}
+.f-sec-lbl{color:var(--txt3);font-size:11px;padding:8px 14px 3px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;}
+.f-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:0.5px solid #161616;cursor:pointer;}
+.f-item:hover{background:var(--bg2);}
+.f-av-wrap{position:relative;flex-shrink:0;}
+.f-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;}
+.online-dot{width:12px;height:12px;border-radius:50%;background:var(--grn);border:2px solid var(--bg);position:absolute;bottom:0;right:0;}
+.f-body{flex:1;min-width:0;}
+.f-name{color:#fff;font-size:13px;font-weight:600;}
+.f-last{color:var(--txt3);font-size:11px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.f-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.f-time{color:var(--txt3);font-size:10px;}
+.unread-dot{background:var(--acc);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px;min-width:18px;text-align:center;}
+.conv-hdr{background:var(--bg2);padding:8px 12px;border-bottom:0.5px solid var(--bdr);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.conv-info{flex:1;}
+.conv-name{color:#fff;font-size:14px;font-weight:700;}
+.conv-status{font-size:11px;margin-top:1px;}
+.conv-acts{display:flex;gap:14px;}
+.conv-acts i{color:var(--txt2);font-size:21px;cursor:pointer;}
+.messages{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:7px;}
+.messages::-webkit-scrollbar{display:none;}
+.msg-row{display:flex;}
+.msg-row.mine{justify-content:flex-end;}
+.bubble{max-width:76%;padding:8px 12px;border-radius:16px;font-size:13px;line-height:1.5;word-break:break-word;}
+.bubble.theirs{background:var(--bg3);color:#fff;border-bottom-left-radius:4px;}
+.bubble.mine{background:var(--acc);color:#fff;border-bottom-right-radius:4px;}
+.b-time{font-size:10px;opacity:.55;margin-top:3px;text-align:right;}
+.voice-bub{display:flex;align-items:center;gap:8px;}
+.voice-bub i{font-size:18px;flex-shrink:0;}
+.v-wave{display:flex;align-items:center;gap:2px;flex:1;}
+.v-wave-b{width:3px;border-radius:2px;background:rgba(255,255,255,0.55);}
+.v-dur{font-size:11px;opacity:.7;}
+.msg-bar{background:var(--bg2);padding:8px 10px;border-top:0.5px solid var(--bdr);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.msg-inp{flex:1;background:var(--bg3);border:0.5px solid var(--bdr);border-radius:22px;padding:9px 14px;color:#fff;font-size:14px;outline:none;}
+.msg-inp::placeholder{color:var(--txt3);}
+.mic-btn{width:38px;height:38px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.mic-btn i{color:var(--txt2);font-size:20px;}
+.mic-btn.rec{background:var(--red);}
+.mic-btn.rec i{color:#fff;}
+.send-btn{width:38px;height:38px;border-radius:50%;background:var(--acc);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.send-btn i{color:#fff;font-size:18px;}
+.empty-conv{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+.empty-conv i{font-size:50px;color:var(--txt3);}
+.empty-conv p{color:var(--txt3);font-size:13px;text-align:center;}
+
+/* ═══ SİZ TAB ═══ */
+.siz-body{flex:1;overflow-y:auto;}
+.siz-body::-webkit-scrollbar{width:5px;}
+.siz-body::-webkit-scrollbar-thumb{background:var(--bg3);}
+@media(min-width:860px){.siz-inner{max-width:680px;margin:0 auto;}}
+.profile-hero{padding:24px 16px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.big-av{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;border:2px solid rgba(255,255,255,0.15);cursor:pointer;}
+.p-name{color:#fff;font-size:18px;font-weight:700;}
+.p-handle{color:var(--txt3);font-size:13px;}
+.p-stats{display:flex;width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;margin-top:4px;}
+.p-stat{flex:1;padding:12px 0;text-align:center;border-right:0.5px solid var(--bdr);}
+.p-stat:last-child{border:none;}
+.p-stat-n{color:#fff;font-size:16px;font-weight:700;}
+.p-stat-l{color:var(--txt3);font-size:10px;margin-top:2px;}
+.siz-sec{margin:0 12px 8px;}
+.siz-sec-lbl{color:var(--txt3);font-size:11px;padding:10px 2px 5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;}
+.siz-row{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);cursor:pointer;border-bottom:0.5px solid var(--bdr);transition:background .15s;}
+.siz-row:hover{background:var(--bg3);}
+.siz-row:first-of-type{border-radius:12px 12px 0 0;}
+.siz-row:last-of-type{border-radius:0 0 12px 12px;border-bottom:none;}
+.siz-row i.ri{color:var(--txt2);font-size:20px;width:24px;flex-shrink:0;}
+.siz-rt{flex:1;}
+.siz-rl{color:#fff;font-size:13px;}
+.siz-rs{color:var(--txt3);font-size:11px;margin-top:1px;}
+.toggle{width:44px;height:26px;border-radius:13px;background:var(--acc);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle-k{width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:2px;left:20px;transition:left .2s;}
+.toggle.off{background:var(--bg3);}
+.toggle.off .toggle-k{left:2px;}
+
+/* ═══ GLOBAL SUB-SCREEN ═══ */
+.g-screen{position:fixed;background:var(--bg);z-index:10000;display:none;flex-direction:column;overflow:hidden;}
+.g-screen.open{display:flex;}
+@media(max-width:859px){.g-screen{inset:0;}}
+@media(min-width:860px){.g-screen{top:52px;bottom:0;left:0;right:0;}}
+.g-screen-hdr{background:var(--bg2);padding:10px 12px;border-bottom:0.5px solid var(--bdr);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.g-screen-title{color:#fff;font-size:15px;font-weight:700;flex:1;}
+.g-screen-body{flex:1;overflow-y:auto;}
+.g-screen-body::-webkit-scrollbar{width:5px;}
+.g-screen-body::-webkit-scrollbar-thumb{background:var(--bg3);}
+@media(min-width:860px){.g-screen-inner{max-width:680px;margin:0 auto;}}
+
+/* ═══ FORMS ═══ */
+.form-inp{background:var(--bg2);border:0.5px solid var(--bdr);border-radius:12px;padding:13px 14px;color:#fff;font-size:14px;outline:none;width:100%;margin-bottom:10px;}
+.form-inp::placeholder{color:var(--txt3);}
+.form-inp:focus{border-color:var(--acc);}
+.form-btn{width:100%;padding:14px;background:var(--acc);border:none;border-radius:14px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;}
+.form-sec{width:100%;padding:12px;background:transparent;border:0.5px solid var(--bdr);border-radius:14px;color:var(--txt2);font-size:14px;cursor:pointer;}
+.type-row{display:flex;gap:8px;margin-bottom:12px;}
+.type-btn{flex:1;padding:10px;border-radius:10px;border:1px solid var(--bdr);background:var(--bg2);color:var(--txt3);font-size:12px;font-weight:600;cursor:pointer;text-align:center;}
+.type-btn.sel{background:var(--acc);color:#fff;border-color:var(--acc);}
+.upload-zone{border:1.5px dashed var(--bdr);border-radius:14px;padding:30px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;margin-bottom:12px;transition:border-color .2s;}
+.upload-zone:hover{border-color:var(--acc);}
+.upload-zone i{font-size:40px;color:var(--acc);}
+.upload-zone span{color:var(--txt2);font-size:13px;text-align:center;line-height:1.5;}
+
+/* ═══ OVERLAYS ═══ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:flex-end;justify-content:center;z-index:50000;}
+.ov-card{background:var(--bg2);border-radius:24px 24px 0 0;padding:20px 20px 30px;width:100%;max-width:440px;}
+.ov-title{color:#fff;font-size:16px;font-weight:700;margin-bottom:14px;}
+.ov-close{background:none;border:none;color:var(--txt3);font-size:22px;cursor:pointer;padding:0;}
+.ov-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.perm-icon{width:58px;height:58px;border-radius:50%;background:rgba(127,119,221,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+.perm-icon i{font-size:28px;color:var(--acc);}
+.perm-title{color:#fff;font-size:16px;font-weight:700;text-align:center;margin-bottom:6px;}
+.perm-desc{color:var(--txt2);font-size:13px;text-align:center;line-height:1.6;margin-bottom:20px;}
+
+/* ═══ REGISTER ═══ */
+.reg-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;z-index:60000;overflow-y:auto;}
+.reg-inner{max-width:420px;width:100%;margin:0 auto;padding:0 24px 40px;}
+.reg-logo{text-align:center;padding:50px 0 8px;font-size:38px;font-weight:800;color:#fff;letter-spacing:-1px;}
+.reg-logo span{color:var(--acc);}
+.reg-sub{color:var(--txt2);text-align:center;font-size:13px;margin-bottom:28px;}
+.reg-or{display:flex;align-items:center;gap:10px;color:var(--txt3);font-size:12px;margin:12px 0;}
+.reg-or::before,.reg-or::after{content:'';flex:1;height:.5px;background:var(--bdr);}
+.reg-foot{text-align:center;color:var(--txt3);font-size:13px;margin-top:10px;}
+.reg-foot span{color:var(--acc);cursor:pointer;}
+
+/* Toast */
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(28,28,28,0.97);border:0.5px solid var(--bdr);color:#fff;font-size:13px;padding:10px 18px;border-radius:20px;z-index:99999;opacity:0;transition:opacity .25s;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════ TOP HEADER (yalnız logo + axtar) ═══════ -->
+  <div class="top-nav">
+    <div class="logo">Bing<span>.</span></div>
+    <div class="nav-right">
+      <button class="nav-icon-btn" onclick="openSearch()"><i class="ti ti-search"></i></button>
+      <button class="plus-btn" onclick="openGScreen('upload')">
+        <i class="ti ti-plus"></i><span>Yüklə</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ CONTENT ═══════ -->
+  <div class="content">
+
+    <!-- BING TAB -->
+    <div class="tab active" id="tab-bing">
+      <div class="bing-feed" id="bingFeed"></div>
+      <!-- Watch screen -->
+      <div class="watch-screen" id="watchScreen" style="display:none">
+        <div class="watch-topbar">
+          <button class="back-btn" onclick="closeWatch()"><i class="ti ti-arrow-left"></i></button>
+          <span class="watch-topbar-title" id="watchTopTitle"></span>
+          <button class="nav-icon-btn" onclick="showToast('Daha çox')"><i class="ti ti-dots-vertical"></i></button>
+        </div>
+        <div class="watch-video" id="watchVideoBg">
+          <i class="ti ti-player-play" style="font-size:52px;color:rgba(255,255,255,0.12)"></i>
+        </div>
+        <div class="watch-progress" onclick="scrub(event)"><div class="watch-progress-fill" id="watchFill"></div></div>
+        <div class="watch-ctrls">
+          <i class="ti ti-player-skip-back" onclick="showToast('10s geri')"></i>
+          <i class="ti ti-player-play" id="watchPlayBtn" onclick="togglePlay()"></i>
+          <i class="ti ti-player-skip-forward" onclick="showToast('10s irəli')"></i>
+          <i class="ti ti-volume" onclick="showToast('Səs')"></i>
+          <span class="watch-time" id="watchTime">0:00 / 0:00</span>
+          <i class="ti ti-maximize" onclick="showToast('Tam ekran')"></i>
+        </div>
+        <div class="watch-body">
+          <div class="watch-main">
+            <div class="watch-info">
+              <div class="watch-title" id="watchTitle"></div>
+              <div class="watch-meta" id="watchMeta"></div>
+            </div>
+            <div class="watch-ch-row">
+              <div class="w-av" id="watchAv"></div>
+              <div class="w-ch" onclick="openChannelFromWatch()">
+                <div class="w-ch-name" id="watchChName"></div>
+                <div class="w-ch-subs" id="watchChSubs"></div>
+              </div>
+              <button class="w-sub-btn" onclick="toggleSub(this)">Abunə ol</button>
+            </div>
+            <div class="watch-acts">
+              <div class="w-act" onclick="toggleVideoLike(this)" id="wLikeBtn"><i class="ti ti-thumb-up"></i><span id="wLikes">0</span></div>
+              <div class="w-act" onclick="showToast('Bəyənmədim')"><i class="ti ti-thumb-down"></i><span>Bəyənmə</span></div>
+              <div class="w-act" onclick="showToast('Paylaşıldı!')"><i class="ti ti-share"></i><span>Paylaş</span></div>
+              <div class="w-act" onclick="toggleVideoSave(this)" id="wSaveBtn"><i class="ti ti-bookmark"></i><span>Saxla</span></div>
+              <div class="w-act" onclick="showToast('Yüklənir...')"><i class="ti ti-download"></i><span>Yüklə</span></div>
+            </div>
+            <div class="watch-comments">
+              <div class="cmt-add">
+                <input class="cmt-add-inp" id="cmtInp" placeholder="Şərh yaz...">
+                <button class="cmt-add-btn" onclick="addComment()">Göndər</button>
+              </div>
+              <div id="cmtList"><div class="cmt-empty">Hələ şərh yoxdur. İlk şərhi sən yaz!</div></div>
+            </div>
+          </div>
+          <div class="watch-sidebar" id="watchSidebar">
+            <div style="color:var(--txt2);font-size:13px;font-weight:600;margin-bottom:14px">Digər videolar</div>
+            <div id="watchSidebarList"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Channel screen -->
+      <div class="ch-screen" id="chScreen" style="display:none">
+        <div class="ch-topbar">
+          <button class="back-btn" onclick="closeChannel()"><i class="ti ti-arrow-left"></i></button>
+          <span class="ch-topbar-title" id="chTopTitle"></span>
+        </div>
+        <div class="ch-body">
+          <div class="ch-banner" id="chBanner"></div>
+          <div class="ch-info-row">
+            <div class="ch-big-av" id="chBigAv"></div>
+            <div class="ch-details">
+              <div class="ch-name" id="chName"></div>
+              <div class="ch-handle" id="chHandle"></div>
+              <div class="ch-stats" id="chStats"></div>
+            </div>
+            <button class="ch-sub-btn" onclick="toggleSub(this)">Abunə ol</button>
+          </div>
+          <div class="ch-tabs">
+            <div class="ch-tab active" onclick="chTabSwitch(0,this)">Videolar</div>
+            <div class="ch-tab" onclick="chTabSwitch(1,this)">Shorts</div>
+            <div class="ch-tab" onclick="chTabSwitch(2,this)">Haqqında</div>
+          </div>
+          <div class="ch-pane" id="chVideosPane"></div>
+          <div class="ch-pane" id="chShortsPane" style="display:none"></div>
+          <div id="chAboutPane" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S TAB -->
+    <div class="tab" id="tab-s">
+      <div class="shorts-wrap" id="shortsWrap"></div>
+    </div>
+
+    <!-- CHATBING TAB -->
+    <div class="tab" id="tab-chat">
+      <div class="chat-wrap">
+        <div class="chat-friend-col" id="chatFriendCol">
+          <div class="chat-hdr">
+            <div class="chat-title-row">
+              <div class="chat-title">ChatBing</div>
+              <div class="chat-hdr-icons">
+                <i class="ti ti-user-plus" onclick="openAddFriend()"></i>
+                <i class="ti ti-camera" onclick="showToast('Story — tezliklə!')"></i>
+              </div>
+            </div>
+            <div class="chat-search"><i class="ti ti-search"></i><span>Axtar...</span></div>
+          </div>
+          <div class="friend-list" id="friendList"></div>
+        </div>
+        <div class="chat-conv-col" id="chatConvCol">
+          <div class="empty-conv" id="emptyConv">
+            <i class="ti ti-message-circle"></i>
+            <p>Söhbət seç və ya<br>yeni dost əlavə et</p>
+          </div>
+          <div id="convInner" style="display:none;flex-direction:column;flex:1">
+            <div class="conv-hdr">
+              <button class="back-btn" onclick="closeConv()"><i class="ti ti-arrow-left"></i></button>
+              <div class="conv-info">
+                <div class="conv-name" id="convName"></div>
+                <div class="conv-status" id="convStatus"></div>
+              </div>
+              <div class="conv-acts">
+                <i class="ti ti-phone" onclick="showToast('Zəng — tezliklə!')"></i>
+                <i class="ti ti-video" onclick="showToast('Video zəng — tezliklə!')"></i>
+              </div>
+            </div>
+            <div class="messages" id="messages"></div>
+            <div class="msg-bar">
+              <button class="mic-btn" id="micBtn" onclick="toggleMic()"><i class="ti ti-microphone"></i></button>
+              <input class="msg-inp" id="msgInp" placeholder="Mesaj yazın..." onkeydown="if(event.key==='Enter')sendMsg()">
+              <button class="send-btn" onclick="sendMsg()"><i class="ti ti-send"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SİZ TAB -->
+    <div class="tab" id="tab-siz">
+      <div class="siz-body">
+        <div class="siz-inner">
+          <div class="profile-hero">
+            <div class="big-av" id="bigAv" style="background:var(--acc)">SN</div>
+            <div class="p-name" id="pName">Sənin Adın</div>
+            <div class="p-handle" id="pHandle">@senim_kanalin</div>
+            <div class="p-stats">
+              <div class="p-stat"><div class="p-stat-n" id="stFol">0</div><div class="p-stat-l">İzləyici</div></div>
+              <div class="p-stat"><div class="p-stat-n" id="stFing">0</div><div class="p-stat-l">İzlənilən</div></div>
+              <div class="p-stat"><div class="p-stat-n" id="stVid">0</div><div class="p-stat-l">Video</div></div>
+            </div>
+          </div>
+          <div class="siz-sec">
+            <div class="siz-sec-lbl">Kanal</div>
+            <div class="siz-row" onclick="openGScreen('upload')"><i class="ti ti-upload ri"></i><div class="siz-rt"><div class="siz-rl">Video / Short yüklə</div><div class="siz-rs">Yeni məzmun paylaş</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="openGScreen('mychannel')"><i class="ti ti-device-tv ri"></i><div class="siz-rt"><div class="siz-rl">Kanalım</div><div class="siz-rs">Videolarını idarə et</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="openGScreen('history')"><i class="ti ti-history ri"></i><div class="siz-rt"><div class="siz-rl">İzlədiklərim</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="openGScreen('saved')"><i class="ti ti-bookmark ri"></i><div class="siz-rt"><div class="siz-rl">Saxlanmışlar</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="openGScreen('liked')"><i class="ti ti-thumb-up ri"></i><div class="siz-rt"><div class="siz-rl">Bəyəndiklərim</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+          </div>
+          <div class="siz-sec">
+            <div class="siz-sec-lbl">Hesab</div>
+            <div class="siz-row" onclick="openGScreen('editprofile')"><i class="ti ti-user-edit ri"></i><div class="siz-rt"><div class="siz-rl">Profili redaktə et</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="openGScreen('notifications')"><i class="ti ti-bell ri"></i><div class="siz-rt"><div class="siz-rl">Bildirişlər</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row"><i class="ti ti-microphone ri"></i><div class="siz-rt"><div class="siz-rl">Səs icazəsi</div><div class="siz-rs">Səsli mesaj & səs əmrləri</div></div><div class="toggle off" id="micToggle" onclick="toggleMicPerm()"><div class="toggle-k"></div></div></div>
+            <div class="siz-row" onclick="openGScreen('language')"><i class="ti ti-language ri"></i><div class="siz-rt"><div class="siz-rl">Dil</div><div class="siz-rs">Azərbaycan dili</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+          </div>
+          <div class="siz-sec">
+            <div class="siz-sec-lbl">Tətbiq</div>
+            <div class="siz-row" onclick="openGScreen('privacy')"><i class="ti ti-shield-check ri"></i><div class="siz-rt"><div class="siz-rl">Gizlilik & Təhlükəsizlik</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="openGScreen('help')"><i class="ti ti-help-circle ri"></i><div class="siz-rt"><div class="siz-rl">Yardım & Dəstək</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="openGScreen('about')"><i class="ti ti-info-circle ri"></i><div class="siz-rt"><div class="siz-rl">Bing haqqında</div><div class="siz-rs">Versiya 1.0.0 · Reklamsız</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="confirmLogout()"><i class="ti ti-logout ri" style="color:var(--red)"></i><div class="siz-rt"><div class="siz-rl" style="color:var(--red)">Çıxış</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- content -->
+
+  <!-- ═══════ BOTTOM NAV ═══════ -->
+  <div class="bottom-nav">
+    <button class="nav-tab active" id="nav-bing" onclick="switchTab('bing')">
+      <i class="ti ti-player-play"></i>
+      <span class="nav-tab-lbl">Bing</span>
+    </button>
+    <button class="nav-tab" id="nav-s" onclick="switchTab('s')">
+      <i class="ti ti-device-mobile-rotated"></i>
+      <span class="s-badge">S</span>
+    </button>
+    <button class="nav-tab" id="nav-chat" onclick="switchTab('chat')">
+      <i class="ti ti-message-circle"></i>
+      <span class="chat-badge">ChatBing</span>
+    </button>
+    <button class="nav-tab" id="nav-siz" onclick="switchTab('siz')">
+      <i class="ti ti-user"></i>
+      <span class="nav-tab-lbl">Siz</span>
+    </button>
+  </div>
+</div><!-- app -->
+
+<!-- GLOBAL SUB-SCREEN -->
+<div class="g-screen" id="gScreen">
+  <div class="g-screen-hdr">
+    <button class="back-btn" onclick="closeGScreen()"><i class="ti ti-arrow-left"></i></button>
+    <span class="g-screen-title" id="gScreenTitle"></span>
+  </div>
+  <div class="g-screen-body"><div class="g-screen-inner" id="gScreenBody"></div></div>
+</div>
+
+<!-- ADD FRIEND OVERLAY -->
+<div class="overlay" id="addFriendOv" style="display:none">
+  <div class="ov-card">
+    <div class="ov-top">
+      <div class="ov-title">Dost əlavə et</div>
+      <button class="ov-close" onclick="document.getElementById('addFriendOv').style.display='none'">✕</button>
+    </div>
+    <div class="type-row">
+      <button class="type-btn sel" id="aTab1" onclick="aTabSwitch(1)">Nömrə ilə</button>
+      <button class="type-btn" id="aTab2" onclick="aTabSwitch(2)">Kanal ilə</button>
+    </div>
+    <div id="aPane1">
+      <input class="form-inp" id="addPhone" placeholder="+994 xx xxx xx xx" type="tel">
+      <button class="form-btn" onclick="doAddFriend('phone')" style="margin-top:4px">Axtar & Əlavə et</button>
+    </div>
+    <div id="aPane2" style="display:none">
+      <input class="form-inp" id="addHandle" placeholder="@kanal_adi">
+      <button class="form-btn" onclick="doAddFriend('handle')" style="margin-top:4px">Axtar & Əlavə et</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGOUT CONFIRM OVERLAY -->
+<div class="overlay" id="logoutOv" style="display:none">
+  <div class="ov-card">
+    <div class="perm-icon" style="background:rgba(226,75,74,0.15)"><i class="ti ti-logout" style="color:var(--red)"></i></div>
+    <div class="perm-title">Hesabdan çıxmaq istəyirsiniz?</div>
+    <div class="perm-desc">Yenidən daxil olmaq üçün<br>nömrə/kanal məlumatlarınız lazım olacaq.</div>
+    <button class="form-btn" style="background:var(--red);margin-bottom:10px" onclick="doLogout()">Çıxış et</button>
+    <button class="form-sec" onclick="document.getElementById('logoutOv').style.display='none'">Ləğv et</button>
+  </div>
+</div>
+
+<!-- PERM OVERLAY -->
+<div class="overlay" id="permOv" style="display:none">
+  <div class="ov-card">
+    <div class="perm-icon"><i class="ti ti-microphone"></i></div>
+    <div class="perm-title">"Bing" mikrofona giriş istəyir</div>
+    <div class="perm-desc">Səsli mesaj göndərmək və<br><strong style="color:#fff">"ChatBing, Araza salam göndər"</strong><br>kimi səs əmrləri üçün icazə verin.</div>
+    <button class="form-btn" onclick="allowMic()" style="margin-bottom:10px">İcazə ver</button>
+    <button class="form-sec" onclick="denyMic()">Rədd et</button>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="reg-overlay" id="regOv">
+  <div class="reg-inner">
+    <div class="reg-logo">Bing<span>.</span></div>
+    <div class="reg-sub">Video · Short · Söhbət — hamısı bir yerdə</div>
+    <input class="form-inp" id="rName" placeholder="Ad Soyad">
+    <input class="form-inp" id="rPhone" placeholder="Nömrə (+994 xx xxx xx xx)" type="tel">
+    <input class="form-inp" id="rHandle" placeholder="Kanal adı (@kanal)">
+    <input class="form-inp" id="rPass" placeholder="Şifrə" type="password">
+    <button class="form-btn" onclick="doReg()">Qeydiyyat / Giriş</button>
+    <div class="reg-or">və ya</div>
+    <button class="form-sec" onclick="doDemo()">Demo olaraq davam et</button>
+    <div class="reg-foot" style="margin-top:12px">Artıq hesabın var? <span onclick="doDemo()">Giriş et</span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════ DATA (bot yoxdur) ═══════════════ */
+/* ═══ API CONFIG ═══ */
+const API = window.location.origin; // same server
+let TOKEN = localStorage.getItem('bing_token') || '';
+let CURRENT_USER = null;
+
+let VIDEOS   = [];
+let SHORTS   = [];
+let FRIENDS  = [];
+let HISTORY  = [];
+let COMMENTS = {};
+let MY_CHANNELS = [];
+
+/* ═══════════════ STATE ═══════════════ */
+let micAllowed=false, curFriend=null, curShort=0;
+let progVal=0, progInt=null;
+let playing=false, watchTimer=null, watchSec=0, watchTotal=0, watchVidIdx=null;
+let swipeY=0;
+let myName='', myHandle='', myInit='';
+
+/* ── CLOCK ── */
+function updateClock(){const n=new Date();const el=document.getElementById('clock');if(el)el.textContent=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');}
+updateClock();setInterval(updateClock,30000);
+
+/* ═══ BING FEED ═══ */
+async function loadVideos(){
+  try{
+    const r=await fetch(API+'/api/videos');
+    const d=await r.json();
+    if(d.ok){VIDEOS=d.videos;}
+  }catch(e){console.error(e);}
+  renderBingFeed();
+}
+async function loadShorts(){
+  try{
+    const r=await fetch(API+'/api/shorts');
+    const d=await r.json();
+    if(d.ok){SHORTS=d.shorts;}
+  }catch(e){console.error(e);}
+  renderShortsTab();
+}
+function renderBingFeed(){
+  const feed=document.getElementById('bingFeed');
+  if(VIDEOS.length===0){
+    feed.innerHTML=`<div class="empty-feed">
+      <i class="ti ti-video-off"></i>
+      <div class="empty-feed-title">Hələ video yoxdur</div>
+      <div class="empty-feed-sub">Bing-ə ilk videoyu sən yüklə!<br>İnsanlar video yüklədikdə burada görünəcək.</div>
+      <button class="empty-feed-btn" onclick="openGScreen('upload')">+ Video yüklə</button>
+    </div>`;
+    return;
+  }
+  const isPC=window.innerWidth>=860;
+  let html='<div class="vid-grid">';
+  VIDEOS.forEach((v,i)=>{
+    const thumbBg=v.thumb?`background-image:url(${API}${v.thumb});background-size:cover;background-position:center`:`background:${v.color}22`;
+    const isOwner=CURRENT_USER&&(v.ownerPhone===TOKEN||CURRENT_USER.admin);
+    html+=`<div class="vid-card" onclick="openWatch(${i})" style="position:relative">
+      <div class="vid-thumb" style="${thumbBg}">
+        ${!v.thumb?'<div class="vid-thumb-play"><i class="ti ti-player-play"></i></div>':''}
+        <div class="vid-dur">${v.dur||'0:00'}</div>
+      </div>
+      <div class="vid-info">
+        <div class="vid-title">${v.title}</div>
+        <div class="vid-ch-row" onclick="event.stopPropagation()">
+          <div class="vid-ch-av" style="background:${v.color}33;color:${v.color}">${v.init}</div>
+          <span class="vid-ch-name">${v.handle}${v.verified?' <i class="ti ti-rosette-discount-check-filled" style="color:#3897F0;font-size:11px;vertical-align:middle"></i>':''}</span>
+        </div>
+        <div class="vid-meta">${v.views||0} baxış · ${v.date||'İndi'}</div>
+      </div>
+      ${isOwner?`<div style="position:absolute;top:6px;right:6px;display:flex;gap:4px">
+        <button onclick="event.stopPropagation();editVideo('${v.id}',${i})" style="background:rgba(0,0,0,0.7);border:none;color:#fff;padding:4px 7px;border-radius:6px;cursor:pointer;font-size:11px"><i class="ti ti-edit"></i></button>
+        <button onclick="event.stopPropagation();deleteVideo('${v.id}')" style="background:rgba(226,75,74,0.8);border:none;color:#fff;padding:4px 7px;border-radius:6px;cursor:pointer;font-size:11px"><i class="ti ti-trash"></i></button>
+      </div>`:''}
+    </div>`;
+  });
+  html+='</div>';
+  feed.innerHTML=html;
+}
+window.addEventListener('resize',renderBingFeed);
+
+/* ═══ WATCH ═══ */
+function openWatch(i){
+  watchVidIdx=i;
+  const v=VIDEOS[i];
+  // add to history
+  if(!HISTORY.find(h=>h.idx===i)) HISTORY.unshift({idx:i,title:v.title,handle:v.handle,color:v.color,init:v.init,date:v.date});
+  saveAccount();
+
+  document.getElementById('watchTopTitle').textContent=v.title;
+  document.getElementById('watchTitle').textContent=v.title;
+  document.getElementById('watchMeta').textContent=(v.views||0)+' baxış · '+(v.date||'');
+  const av=document.getElementById('watchAv');
+  av.textContent=v.init; av.style.cssText=`background:${v.color}33;color:${v.color};border:1.5px solid ${v.color};width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer`;
+  document.getElementById('watchChName').innerHTML=v.handle+(v.verified?' <i class="ti ti-rosette-discount-check-filled" style="color:#3897F0;font-size:13px;vertical-align:middle"></i>':'');
+  document.getElementById('watchChSubs').textContent=(v.subs||0)+' abunəçi';
+  document.getElementById('wLikes').textContent=v.likes||0;
+  // restore like/save button state
+  const likeKey=v.title+'|'+v.handle;
+  const likeIcon=document.getElementById('wLikeBtn').querySelector('i');
+  likeIcon.style.color=likedVideos.includes(likeKey)?'var(--acc)':'';
+  const saveIcon=document.getElementById('wSaveBtn').querySelector('i');
+  saveIcon.style.color=savedVideos.includes(likeKey)?'var(--acc)':'';
+  // video element
+  const vbg=document.getElementById('watchVideoBg');
+  if(v.videoUrl){
+    vbg.style.background='#000';
+    vbg.innerHTML=`<video id="realWatchVideo" src="${v.videoUrl}" style="width:100%;height:100%;object-fit:contain" playsinline></video>`;
+    const rv=document.getElementById('realWatchVideo');
+    rv.addEventListener('loadedmetadata',()=>{
+      watchTotal=Math.floor(rv.duration);
+      updateWatchTime();
+    });
+    rv.addEventListener('timeupdate',()=>{
+      watchSec=Math.floor(rv.currentTime);
+      document.getElementById('watchFill').style.width=watchTotal>0?(watchSec/watchTotal*100)+'%':'0%';
+      updateWatchTime();
+    });
+    rv.addEventListener('ended',()=>{playing=false;document.getElementById('watchPlayBtn').className='ti ti-player-play';});
+  } else {
+    vbg.innerHTML=`<i class="ti ti-player-play" style="font-size:52px;color:rgba(255,255,255,0.12)"></i>`;
+    vbg.style.background=v.color+'22';
+    const parts=(v.dur||'0:00').split(':');
+    watchTotal=parseInt(parts[0]||0)*60+parseInt(parts[1]||0);
+  }
+  watchSec=0;playing=false;
+  document.getElementById('watchPlayBtn').className='ti ti-player-play';
+  document.getElementById('watchFill').style.width='0%';
+  updateWatchTime();
+  // comments
+  renderComments(i);
+  // sidebar
+  const sl=document.getElementById('watchSidebarList');
+  const others=VIDEOS.filter((_,idx)=>idx!==i);
+  if(others.length===0){sl.innerHTML=`<div style="color:var(--txt3);font-size:13px">Başqa video yoxdur</div>`;}
+  else{sl.innerHTML=others.map((rv,ri)=>`<div style="display:flex;gap:10px;margin-bottom:14px;cursor:pointer" onclick="openWatch(${VIDEOS.indexOf(rv)})"><div style="width:110px;height:62px;border-radius:6px;background:${rv.color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">${rv.thumb?`<img src="${rv.thumb}" style="width:100%;height:100%;object-fit:cover">`:`<i class="ti ti-player-play" style="color:${rv.color};font-size:22px"></i>`}</div><div style="flex:1;min-width:0"><div style="color:#fff;font-size:12px;font-weight:500;line-height:1.4">${rv.title}</div><div style="color:var(--txt3);font-size:11px;margin-top:4px">${rv.handle}</div></div></div>`).join('');}
+  document.getElementById('watchScreen').style.display='flex';
+}
+function closeWatch(){
+  document.getElementById('watchScreen').style.display='none';
+  const rv=document.getElementById('realWatchVideo');
+  if(rv)rv.pause();
+  if(watchTimer){clearInterval(watchTimer);watchTimer=null;playing=false;}
+  document.getElementById('watchPlayBtn').className='ti ti-player-play';
+}
+function openChannelFromWatch(){
+  if(watchVidIdx===null) return;
+  const v=VIDEOS[watchVidIdx];
+  openChannel(v);
+}
+function togglePlay(){
+  const rv=document.getElementById('realWatchVideo');
+  if(rv){
+    if(playing){rv.pause();playing=false;document.getElementById('watchPlayBtn').className='ti ti-player-play';}
+    else{rv.play();playing=true;document.getElementById('watchPlayBtn').className='ti ti-player-pause';}
+    return;
+  }
+  if(playing){clearInterval(watchTimer);watchTimer=null;playing=false;document.getElementById('watchPlayBtn').className='ti ti-player-play';}
+  else{playing=true;document.getElementById('watchPlayBtn').className='ti ti-player-pause';
+    watchTimer=setInterval(()=>{watchSec++;if(watchSec>=watchTotal&&watchTotal>0){watchSec=watchTotal;clearInterval(watchTimer);watchTimer=null;playing=false;document.getElementById('watchPlayBtn').className='ti ti-player-play';}
+    document.getElementById('watchFill').style.width=watchTotal>0?(watchSec/watchTotal*100)+'%':'0%';updateWatchTime();},1000);}
+}
+function updateWatchTime(){const f=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');document.getElementById('watchTime').textContent=f(watchSec)+' / '+f(watchTotal);}
+function scrub(e){
+  const p=e.offsetX/e.currentTarget.offsetWidth;
+  watchSec=Math.floor(watchTotal*p);
+  const rv=document.getElementById('realWatchVideo');
+  if(rv)rv.currentTime=watchSec;
+  document.getElementById('watchFill').style.width=(p*100)+'%';updateWatchTime();
+}
+
+/* ═══ LIKE / SAVE (persisted) ═══ */
+async function toggleVideoLike(btn){
+  if(watchVidIdx===null||!TOKEN)return;
+  const v=VIDEOS[watchVidIdx];
+  try{
+    const r=await fetch(API+'/api/videos/'+v.id+'/like',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:TOKEN})
+    });
+    const d=await r.json();
+    if(d.ok){
+      likedVideos=d.likedList||[];
+      const icon=btn.querySelector('i');
+      icon.style.color=d.liked?'var(--acc)':'';
+      v.likes=Math.max(0,(v.likes||0)+(d.liked?1:-1));
+      document.getElementById('wLikes').textContent=v.likes;
+      if(d.liked)showToast('👍 Bəyəndiniz!');
+    }
+  }catch(e){}
+}
+async function toggleVideoSave(btn){
+  if(watchVidIdx===null||!TOKEN)return;
+  const v=VIDEOS[watchVidIdx];
+  try{
+    const r=await fetch(API+'/api/videos/'+v.id+'/save',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:TOKEN})
+    });
+    const d=await r.json();
+    if(d.ok){
+      savedVideos=d.savedList||[];
+      const icon=btn.querySelector('i');
+      icon.style.color=d.saved?'var(--acc)':'';
+      showToast(d.saved?'Saxlanmışlara əlavə edildi 🔖':'Saxlanmışlardan silindi');
+    }
+  }catch(e){}
+}
+
+/* ═══ COMMENTS ═══ */
+function renderComments(vidIdx){
+  const list=document.getElementById('cmtList');
+  const cmts=COMMENTS[vidIdx]||[];
+  if(cmts.length===0){list.innerHTML=`<div class="cmt-empty">Hələ şərh yoxdur. İlk şərhi sən yaz!</div>`; return;}
+  list.innerHTML=cmts.map(c=>`<div class="cmt-item"><div class="cmt-av" style="background:${c.color||'var(--acc)'}">${c.init||'?'}</div><div><div class="cmt-name">${c.name}${c.verified?' <i class="ti ti-rosette-discount-check-filled" style="color:#3897F0;font-size:11px;vertical-align:middle"></i>':''}</div><div class="cmt-text">${c.text}</div></div></div>`).join('');
+}
+async function addComment(){
+  if(watchVidIdx===null) return;
+  const inp=document.getElementById('cmtInp');
+  const txt=inp.value.trim(); if(!txt){showToast('Şərh yazın');return;}
+  if(!TOKEN){showToast('Şərh yazmaq üçün giriş edin');return;}
+  const vid=VIDEOS[watchVidIdx];
+  if(!vid) return;
+  try{
+    const r=await fetch(API+'/api/videos/'+vid.id+'/comment',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:TOKEN,text:txt})
+    });
+    const d=await r.json();
+    if(d.ok){
+      if(!COMMENTS[watchVidIdx]) COMMENTS[watchVidIdx]=[];
+      COMMENTS[watchVidIdx].unshift(d.comment);
+      inp.value='';
+      renderComments(watchVidIdx);
+      showToast('Şərh əlavə edildi ✅');
+    }
+  }catch(e){showToast('Xəta baş verdi');}
+}
+
+/* ═══ CHANNEL ═══ */
+function openChannel(v){
+  document.getElementById('chTopTitle').textContent=v.handle;
+  const b=document.getElementById('chBanner');
+  b.style.cssText=`background:linear-gradient(135deg,${v.color}33,${v.color}11);width:100%;height:90px;display:flex;align-items:center;justify-content:center`;
+  b.innerHTML=`<i class="ti ti-device-tv" style="font-size:40px;color:${v.color}44"></i>`;
+  const bav=document.getElementById('chBigAv');
+  bav.textContent=v.init; bav.style.cssText=`width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;background:${v.color}33;color:${v.color};border:2px solid ${v.color}`;
+  document.getElementById('chName').innerHTML=(v.chName||v.handle)+(v.verified?' <i class="ti ti-rosette-discount-check-filled" style="color:#3897F0;font-size:15px;vertical-align:middle"></i>':'');
+  document.getElementById('chHandle').textContent=v.handle;
+  const chVids=VIDEOS.filter(vi=>vi.handle===v.handle);
+  document.getElementById('chStats').textContent=(v.subs||0)+' abunəçi · '+chVids.length+' video';
+  // reset tabs
+  document.querySelectorAll('.ch-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.getElementById('chVideosPane').style.display='';
+  document.getElementById('chShortsPane').style.display='none';
+  document.getElementById('chAboutPane').style.display='none';
+  // videos
+  if(chVids.length===0){document.getElementById('chVideosPane').innerHTML=`<div style="color:var(--txt3);font-size:13px;padding:24px;text-align:center">Bu kanalda hələ video yoxdur</div>`;}
+  else{document.getElementById('chVideosPane').innerHTML=`<div class="ch-vid-grid">`+chVids.map((cv,ci)=>`<div class="ch-vid-item" onclick="openWatch(${VIDEOS.indexOf(cv)})"><div class="ch-vid-thumb" style="background:${cv.color}22"><i class="ti ti-player-play" style="color:${cv.color}"></i><div class="ch-vid-dur">${cv.dur||'0:00'}</div></div><div class="ch-vid-title">${cv.title}</div><div class="ch-vid-views">${cv.views||0} baxış</div></div>`).join('')+'</div>';}
+  // shorts
+  const chShorts=SHORTS.filter(s=>s.handle===v.handle);
+  if(chShorts.length===0){document.getElementById('chShortsPane').innerHTML=`<div style="color:var(--txt3);font-size:13px;padding:24px;text-align:center">Bu kanalda hələ short yoxdur</div>`;}
+  else{document.getElementById('chShortsPane').innerHTML=`<div class="ch-vid-grid">`+chShorts.map(s=>`<div class="ch-vid-item"><div class="ch-vid-thumb" style="background:${s.color}22;aspect-ratio:9/16;height:120px"><i class="ti ti-device-mobile-rotated" style="color:${s.color}"></i></div><div class="ch-vid-title">${s.caption}</div></div>`).join('')+'</div>';}
+  // about
+  document.getElementById('chAboutPane').innerHTML=`<div style="padding:14px"><div style="color:var(--txt2);font-size:12px;font-weight:600;margin-bottom:6px">Haqqında</div><div style="color:var(--txt3);font-size:13px;line-height:1.6">${v.bio||'Bu kanal haqqında məlumat yoxdur.'}</div><div style="display:flex;align-items:center;gap:8px;padding:12px 0;border-top:0.5px solid var(--bdr);margin-top:10px"><i class="ti ti-ad-off" style="color:var(--grn)"></i><span style="color:var(--grn);font-size:13px">Reklamsız kanal</span></div></div>`;
+  document.getElementById('chScreen').style.display='flex';
+}
+function closeChannel(){document.getElementById('chScreen').style.display='none';}
+function chTabSwitch(idx,el){
+  document.querySelectorAll('.ch-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  document.getElementById('chVideosPane').style.display=idx===0?'':'none';
+  document.getElementById('chShortsPane').style.display=idx===1?'':'none';
+  document.getElementById('chAboutPane').style.display=idx===2?'':'none';
+}
+
+/* ═══ SHORTS ═══ */
+function renderShortsTab(){
+  const wrap=document.getElementById('shortsWrap');
+  if(SHORTS.length===0){
+    wrap.innerHTML=`<div class="short-empty">
+      <i class="ti ti-device-mobile-rotated"></i>
+      <div class="short-empty-title">Hələ short yoxdur</div>
+      <div class="short-empty-sub">İlk short-u sən çək!<br>İnsanlar yüklədikdə burada görünəcək.</div>
+      <button class="empty-feed-btn" onclick="openGScreen('upload')">+ Short yüklə</button>
+    </div>`;
+    return;
+  }
+  wrap.innerHTML=`
+    <div class="short-player">
+      <div class="short-slide">
+        <div class="s-bg" id="sBg"></div>
+        <div class="s-grad"></div>
+        <div class="s-center-play"><i class="ti ti-player-play"></i></div>
+        <div class="s-right">
+          <div class="s-av-ring" id="sAvRing"></div>
+          <div class="s-act" onclick="toggleLike(this)"><i class="ti ti-heart"></i><span id="sLikes">0</span></div>
+          <div class="s-act" onclick="showToast('Şərhlər')"><i class="ti ti-message-circle"></i><span id="sCmts">0</span></div>
+          <div class="s-act" onclick="showToast('Paylaşıldı!')"><i class="ti ti-share"></i><span>Paylaş</span></div>
+        </div>
+        <div class="s-bottom">
+          <div class="s-user-row">
+            <span class="s-uname" id="sUname"></span>
+            <button class="s-follow-btn" onclick="toggleFollow(this)">+ İzlə</button>
+          </div>
+          <div class="s-caption" id="sCaption"></div>
+          <div class="s-tags" id="sTags"></div>
+        </div>
+        <div class="s-prog-bar"><div class="s-prog-fill" id="sProg"></div></div>
+      </div>
+    </div>
+    <div class="shorts-topbar">
+      <span>Shorts</span>
+      <div class="shorts-topbar-icons">
+        <i class="ti ti-camera" onclick="openGScreen('upload')"></i>
+      </div>
+    </div>
+    <div class="swipe-hint" id="swipeHint">
+      <i class="ti ti-chevrons-up" style="font-size:20px;display:block;text-align:center"></i>
+      Yuxarı sürüşdür
+    </div>`;
+  renderShort(curShort);
+  initSwipe();
+  setTimeout(()=>{const h=document.getElementById('swipeHint');if(h)h.style.opacity='0';},4000);
+}
+function renderShort(i){
+  const s=SHORTS[i%SHORTS.length];
+  const bg=document.getElementById('sBg');if(!bg)return;
+  bg.style.cssText=`background:${s.color}22;width:100%;height:100%`;
+  const ar=document.getElementById('sAvRing');ar.textContent=s.init;ar.style.cssText=`width:38px;height:38px;border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:${s.color}44;color:${s.color}`;
+  document.getElementById('sUname').textContent=s.handle;
+  document.getElementById('sCaption').textContent=s.caption;
+  document.getElementById('sTags').textContent=s.tags||'';
+  document.getElementById('sLikes').textContent=s.likes||0;
+  document.getElementById('sCmts').textContent=s.comments||0;
+  progVal=0;document.getElementById('sProg').style.width='0%';
+  if(progInt)clearInterval(progInt);
+  progInt=setInterval(()=>{progVal+=0.25;if(progVal>=100){progVal=0;curShort++;renderShort(curShort);}document.getElementById('sProg').style.width=progVal+'%';},80);
+}
+function initSwipe(){
+  const c=document.getElementById('shortsWrap');if(!c)return;
+  c.addEventListener('touchstart',e=>{swipeY=e.touches[0].clientY;},{passive:true});
+  c.addEventListener('touchend',e=>{const d=swipeY-e.changedTouches[0].clientY;if(d>50){curShort++;renderShort(curShort);const h=document.getElementById('swipeHint');if(h)h.style.display='none';}else if(d<-50&&curShort>0){curShort--;renderShort(curShort);}});
+  let md=false,msy=0;
+  c.addEventListener('mousedown',e=>{md=true;msy=e.clientY;});
+  c.addEventListener('mouseup',e=>{if(!md)return;md=false;const d=msy-e.clientY;if(d>40){curShort++;renderShort(curShort);}else if(d<-40&&curShort>0){curShort--;renderShort(curShort);}});
+}
+
+/* ═══ FRIENDS ═══ */
+async function loadFriends(){
+  if(!TOKEN)return;
+  try{
+    const r=await fetch(API+'/api/friends/'+TOKEN);
+    const d=await r.json();
+    if(d.ok){FRIENDS.length=0;d.friends.forEach(f=>FRIENDS.push(f));}
+  }catch(e){}
+  renderFriends();
+}
+function renderFriends(){
+  let h='<div class="f-sec-lbl">Dostlar</div>';
+  if(FRIENDS.length===0){
+    h+=`<div style="padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:12px">
+      <i class="ti ti-users" style="font-size:48px;color:var(--txt3)"></i>
+      <div style="color:#fff;font-size:15px;font-weight:600">Hələ dost yoxdur</div>
+      <div style="color:var(--txt3);font-size:13px;text-align:center;line-height:1.6">Nömrə və ya kanal ilə<br>dost əlavə et</div>
+      <button onclick="openAddFriend()" style="padding:10px 22px;background:var(--acc);border:none;border-radius:20px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px">+ Dost əlavə et</button>
+    </div>`;
+  } else {
+    FRIENDS.forEach((f,i)=>{
+      h+=`<div class="f-item" onclick="openConv(${i})">
+        <div class="f-av-wrap"><div class="f-av" style="background:${f.color}22;color:${f.color};border:1.5px solid ${f.color}">${f.init}</div>${f.online?'<div class="online-dot"></div>':''}</div>
+        <div class="f-body"><div class="f-name">${f.name}</div><div class="f-last">${f.last||'Söhbət başladın'}</div></div>
+        <div class="f-meta"><span class="f-time">${f.time||''}</span>${f.unread?`<span class="unread-dot">${f.unread}</span>`:''}</div>
+      </div>`;
+    });
+  }
+  h+=`<div class="f-item" onclick="openAddFriend()">
+    <div class="f-av-wrap"><div class="f-av" style="background:var(--bg3);color:var(--acc);border:1px dashed var(--acc);font-size:22px"><i class="ti ti-plus"></i></div></div>
+    <div class="f-body"><div class="f-name" style="color:var(--acc)">Dost əlavə et</div><div class="f-last">Nömrə və ya kanal ilə</div></div>
+  </div>`;
+  document.getElementById('friendList').innerHTML=h;
+}
+function openAddFriend(){
+  document.getElementById('addFriendOv').style.display='flex';
+  document.getElementById('addPhone').value='';
+  document.getElementById('addHandle').value='';
+}
+function aTabSwitch(n){
+  document.getElementById('aPane1').style.display=n===1?'block':'none';
+  document.getElementById('aPane2').style.display=n===2?'block':'none';
+  document.getElementById('aTab1').classList.toggle('sel',n===1);
+  document.getElementById('aTab2').classList.toggle('sel',n===2);
+}
+async function doAddFriend(type){
+  const val=type==='phone'?document.getElementById('addPhone').value.trim():document.getElementById('addHandle').value.trim();
+  if(!val){showToast(type==='phone'?'Nömrə yazın':'Kanal adı yazın');return;}
+  if(!TOKEN){showToast('Əvvəlcə giriş edin');return;}
+  try{
+    const r=await fetch(API+'/api/friends/add',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:TOKEN,targetPhone:val})
+    });
+    const d=await r.json();
+    if(d.ok){
+      document.getElementById('addFriendOv').style.display='none';
+      await loadFriends();
+      showToast(d.friend.name+' əlavə edildi ✅');
+    } else {
+      showToast(d.msg||'Bu nömrədə hesab tapılmadı');
+    }
+  }catch(e){showToast('Xəta baş verdi');}
+}
+function openConv(i){
+  curFriend=i;FRIENDS[i].unread=0;
+  if(window.innerWidth<860) document.getElementById('chatFriendCol').style.display='none';
+  document.getElementById('emptyConv').style.display='none';
+  const ci=document.getElementById('convInner');ci.style.display='flex';
+  document.getElementById('convName').textContent=FRIENDS[i].name;
+  const cs=document.getElementById('convStatus');cs.textContent=FRIENDS[i].online?'Online':'Offline';cs.style.color=FRIENDS[i].online?'var(--grn)':'var(--txt3)';
+  document.getElementById('chatConvCol').style.display='flex';
+  renderMsgs();renderFriends();
+  setTimeout(()=>{const m=document.getElementById('messages');if(m)m.scrollTop=m.scrollHeight;},50);
+}
+function closeConv(){
+  document.getElementById('chatFriendCol').style.display='flex';
+  document.getElementById('convInner').style.display='none';
+  document.getElementById('emptyConv').style.display='flex';
+  if(window.innerWidth<860) document.getElementById('chatConvCol').style.display='none';
+}
+function renderMsgs(){
+  if(curFriend===null)return;
+  const ms=document.getElementById('messages');if(!ms)return;
+  const msgs=FRIENDS[curFriend].msgs||[];
+  if(msgs.length===0){ms.innerHTML=`<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px">${FRIENDS[curFriend].name} ilə söhbəti başlat!</div>`;return;}
+  ms.innerHTML=msgs.map(m=>{
+    if(m.voice){const bars=Array(10).fill(0).map((_,i)=>`<div class="v-wave-b" style="height:${7+Math.sin(i*1.3)*5}px"></div>`).join('');return`<div class="msg-row ${m.f==='me'?'mine':''}"><div class="bubble ${m.f==='me'?'mine':'theirs'}"><div class="voice-bub"><i class="ti ti-player-play"></i><div class="v-wave">${bars}</div><span class="v-dur">${m.dur}</span></div><div class="b-time">${m.time||''}</div></div></div>`;}
+    return`<div class="msg-row ${m.f==='me'?'mine':''}"><div class="bubble ${m.f==='me'?'mine':'theirs'}">${m.t}<div class="b-time">${m.time||''}</div></div></div>`;
+  }).join('');
+  ms.scrollTop=ms.scrollHeight;
+}
+function sendMsg(){
+  if(curFriend===null)return;
+  const inp=document.getElementById('msgInp');const txt=inp.value.trim();if(!txt)return;
+  const ts=now();
+  if(!FRIENDS[curFriend].msgs) FRIENDS[curFriend].msgs=[];
+  FRIENDS[curFriend].msgs.push({f:'me',t:txt,time:ts});
+  FRIENDS[curFriend].last=txt;FRIENDS[curFriend].time='İndi';
+  inp.value='';renderMsgs();renderFriends();
+}
+function now(){const t=new Date();return t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');}
+
+/* ═══ MIC ═══ */
+let mediaRec=null;
+function toggleMic(){
+  if(!micAllowed){showToast('Əvvəlcə mikrofon icazəsi verin → Siz');return;}
+  const btn=document.getElementById('micBtn');
+  if(btn.classList.contains('rec')){
+    btn.classList.remove('rec');btn.querySelector('i').className='ti ti-microphone';
+    if(mediaRec&&mediaRec.state!=='inactive')mediaRec.stop();
+    if(curFriend!==null){
+      const ts=now();
+      FRIENDS[curFriend].msgs.push({f:'me',voice:true,dur:'0:05',time:ts});
+      FRIENDS[curFriend].last='🎤 Səsli mesaj';
+      renderMsgs();renderFriends();showToast('Səsli mesaj göndərildi 🎤');
+    }
+  } else {
+    navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
+      btn.classList.add('rec');btn.querySelector('i').className='ti ti-player-stop';
+      mediaRec=new MediaRecorder(s);mediaRec.start();
+      mediaRec.onstop=()=>s.getTracks().forEach(t=>t.stop());
+    }).catch(()=>showToast('Mikrofona giriş alınmadı'));
+  }
+}
+function allowMic(){micAllowed=true;document.getElementById('permOv').style.display='none';document.getElementById('micToggle').classList.remove('off');showToast('Mikrofon icazəsi verildi ✅');}
+function denyMic(){document.getElementById('permOv').style.display='none';showToast('Rədd edildi');}
+function toggleMicPerm(){const t=document.getElementById('micToggle');if(t.classList.contains('off')){document.getElementById('permOv').style.display='flex';}else{t.classList.add('off');micAllowed=false;showToast('Mikrofon söndürüldü');}}
+
+/* ═══ UPLOAD ═══ */
+let uploadType='video';
+let selectedFile=null, selectedFileUrl=null, selectedThumb=null;
+function buildUploadScreen(){
+  return`<div style="padding:16px">
+    <div class="type-row">
+      <button class="type-btn ${uploadType==='video'?'sel':''}" onclick="setUpType('video',this)">Uzun Video</button>
+      <button class="type-btn ${uploadType==='short'?'sel':''}" onclick="setUpType('short',this)">Short</button>
+    </div>
+    <input type="file" id="upFileInput" accept="video/*" style="display:none" onchange="onFilePicked(event)">
+    <div class="upload-zone" id="uploadZoneBox" onclick="document.getElementById('upFileInput').click()">
+      <i class="ti ti-cloud-upload" id="uploadZoneIcon"></i>
+      <span id="uploadZoneText">Videonu buraya yüklə<br>və ya qalereyadan seç</span>
+    </div>
+    <input class="form-inp" id="upTitle" placeholder="Video başlığı *">
+    <input class="form-inp" id="upCaption" placeholder="${uploadType==='short'?'Başlıq / mətn':'Açıqlama'}">
+    <input class="form-inp" id="upTags" placeholder="Etiketlər: #baki #tech">
+    <button class="form-btn" onclick="doUpload()">Yüklə & Paylaş</button>
+  </div>`;
+}
+function onFilePicked(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  if(!file.type.startsWith('video/')){showToast('Zəhmət olmasa video faylı seçin');return;}
+  selectedFile=file;
+  if(selectedFileUrl)URL.revokeObjectURL(selectedFileUrl);
+  selectedFileUrl=URL.createObjectURL(file);
+  // Generate thumbnail from video
+  const vid=document.createElement('video');
+  vid.src=selectedFileUrl;
+  vid.muted=true;
+  vid.addEventListener('loadeddata',()=>{
+    vid.currentTime=Math.min(1,vid.duration/2);
+  });
+  vid.addEventListener('seeked',()=>{
+    const canvas=document.createElement('canvas');
+    canvas.width=vid.videoWidth;canvas.height=vid.videoHeight;
+    canvas.getContext('2d').drawImage(vid,0,0);
+    selectedThumb=canvas.toDataURL('image/jpeg',0.7);
+  });
+  // Update upload zone UI
+  const box=document.getElementById('uploadZoneBox');
+  const icon=document.getElementById('uploadZoneIcon');
+  const text=document.getElementById('uploadZoneText');
+  if(icon)icon.className='ti ti-circle-check';
+  if(icon)icon.style.color='var(--grn)';
+  if(text)text.innerHTML='<strong style="color:#fff">'+file.name+'</strong><br>Seçildi · '+(file.size/1024/1024).toFixed(1)+' MB';
+  showToast('Video seçildi ✅');
+  // Auto-fill title if empty
+  const titleInp=document.getElementById('upTitle');
+  if(titleInp&&!titleInp.value){titleInp.value=file.name.replace(/\.[^/.]+$/,'');}
+}
+function setUpType(t,el){
+  uploadType=t;
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');
+  document.getElementById('gScreenBody').innerHTML=buildUploadScreen();
+  selectedFile=null;selectedThumb=null;
+  if(selectedFileUrl){URL.revokeObjectURL(selectedFileUrl);selectedFileUrl=null;}
+}
+async function doUpload(){
+  const title=document.getElementById('upTitle')?.value.trim();
+  if(!title){showToast('Başlıq yazın');return;}
+  if(!selectedFile){showToast('Əvvəlcə video seçin');return;}
+  if(!TOKEN){showToast('Əvvəlcə giriş edin');return;}
+  const caption=document.getElementById('upCaption')?.value.trim()||'';
+  const tags=document.getElementById('upTags')?.value.trim()||'';
+  const btn=document.querySelector('.form-btn');
+  if(btn){btn.textContent='Yüklənir...';btn.disabled=true;}
+  const fd=new FormData();
+  fd.append('video',selectedFile);
+  fd.append('token',TOKEN);
+  fd.append('title',title);
+  fd.append('caption',caption);
+  fd.append('tags',tags);
+  fd.append('type',uploadType);
+  fd.append('thumb',selectedThumb||'');
+  try{
+    const r=await fetch(API+'/api/videos/upload',{method:'POST',body:fd});
+    const d=await r.json();
+    if(d.ok){
+      if(uploadType==='short'){
+        SHORTS.unshift(d.video);
+        renderShortsTab();
+        showToast('Short yükləndi! 🎉');
+      } else {
+        VIDEOS.unshift(d.video);
+        renderBingFeed();
+        showToast('Video yükləndi! 🎉');
+      }
+      const stVid=document.getElementById('stVid');
+      if(stVid) stVid.textContent=parseInt(stVid.textContent||0)+1;
+      selectedFile=null;selectedFileUrl=null;selectedThumb=null;
+      closeGScreen();
+    } else {
+      showToast(d.msg||'Xəta baş verdi');
+    }
+  }catch(e){showToast('Server bağlantı xətası');}
+  finally{if(btn){btn.textContent='Yüklə & Paylaş';btn.disabled=false;}}
+}
+
+/* ═══ SİZ SUB-SCREENS ═══ */
+const G={
+  upload:{title:'Video / Short Yüklə', render:()=>buildUploadScreen()},
+  mychannel:{title:'Kanalım', render:()=>`<div style="padding:14px">
+    <div style="background:var(--bg2);border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff">${myInit||'SN'}</div>
+      <div><div style="color:#fff;font-size:15px;font-weight:700">${myName||'Sənin Adın'}</div><div style="color:var(--txt3);font-size:12px">${document.getElementById('pHandle')?.textContent||'@senim_kanalin'}</div><div style="color:var(--txt3);font-size:11px;margin-top:3px">0 abunəçi · ${VIDEOS.filter(v=>v.handle===document.getElementById('pHandle')?.textContent).length} video</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <button onclick="openGScreen('upload')" style="padding:14px;background:var(--acc);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:600;cursor:pointer"><i class="ti ti-upload" style="display:block;font-size:24px;margin-bottom:4px"></i>Yüklə</button>
+      <button onclick="showToast('Analitika tezliklə!')" style="padding:14px;background:var(--bg2);border:0.5px solid var(--bdr);border-radius:12px;color:#fff;font-size:13px;font-weight:600;cursor:pointer"><i class="ti ti-chart-bar" style="display:block;font-size:24px;margin-bottom:4px;color:var(--acc)"></i>Analitika</button>
+    </div>
+    ${VIDEOS.filter(v=>v.handle===document.getElementById('pHandle')?.textContent).length===0
+      ?`<div style="background:var(--bg2);border-radius:12px;padding:36px;display:flex;flex-direction:column;align-items:center;gap:10px"><i class="ti ti-video-off" style="font-size:40px;color:var(--txt3)"></i><span style="color:var(--txt3);font-size:13px">Hələ heç bir video yoxdur</span><button onclick="openGScreen('upload')" style="padding:8px 18px;background:var(--acc);border:none;border-radius:20px;color:#fff;font-size:12px;cursor:pointer;margin-top:4px">İlk videonu yüklə</button></div>`
+      :'<div class="ch-vid-grid">'+VIDEOS.filter(v=>v.handle===document.getElementById('pHandle')?.textContent).map((v,i)=>`<div class="ch-vid-item" onclick="openWatch(${VIDEOS.indexOf(v)});closeGScreen()"><div class="ch-vid-thumb" style="background:${v.color}22"><i class="ti ti-player-play" style="color:${v.color}"></i></div><div class="ch-vid-title">${v.title}</div></div>`).join('')+'</div>'
+    }
+  </div>`},
+  history:{title:'İzlədiklərim', render:()=>HISTORY.length===0
+    ?`<div style="padding:50px 20px;display:flex;flex-direction:column;align-items:center;gap:12px"><i class="ti ti-history" style="font-size:48px;color:var(--txt3)"></i><div style="color:#fff;font-size:15px;font-weight:600">Hələ heç nə izlənilməyib</div><div style="color:var(--txt3);font-size:13px;text-align:center">Video izlədikdə buraya düşəcək</div></div>`
+    :HISTORY.map(h=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:0.5px solid #161616;cursor:pointer" onclick="openWatch(${h.idx});closeGScreen()"><div style="width:88px;height:50px;border-radius:8px;background:${h.color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-player-play" style="font-size:24px;color:${h.color}"></i></div><div style="flex:1;min-width:0"><div style="color:#fff;font-size:12px;font-weight:500;line-height:1.4">${h.title}</div><div style="color:var(--txt3);font-size:11px;margin-top:3px">${h.handle}</div></div><div style="color:var(--txt3);font-size:10px;flex-shrink:0">${h.date||''}</div></div>`).join('')},
+  saved:{title:'Saxlanmışlar', render:()=>`<div style="padding:50px 20px;display:flex;flex-direction:column;align-items:center;gap:12px"><i class="ti ti-bookmark" style="font-size:48px;color:var(--txt3)"></i><div style="color:#fff;font-size:15px;font-weight:600">Hələ heç nə saxlanmayıb</div><div style="color:var(--txt3);font-size:13px;text-align:center">Videolarda "Saxla" düyməsini istifadə et</div></div>`},
+  liked:{title:'Bəyəndiklərim', render:()=>`<div style="padding:50px 20px;display:flex;flex-direction:column;align-items:center;gap:12px"><i class="ti ti-thumb-up" style="font-size:48px;color:var(--txt3)"></i><div style="color:#fff;font-size:15px;font-weight:600">Hələ heç nə bəyənilməyib</div><div style="color:var(--txt3);font-size:13px;text-align:center">Videolarda 👍 düyməsini istifadə et</div></div>`},
+  editprofile:{title:'Profili Redaktə Et', render:()=>`<div style="padding:14px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:20px">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff">${myInit||'SN'}</div>
+      <span style="color:var(--acc);font-size:12px;cursor:pointer" onclick="showToast('Şəkil seç')">Profil şəklini dəyiş</span>
+    </div>
+    <input class="form-inp" id="epName" placeholder="Ad Soyad" value="${myName||''}">
+    <input class="form-inp" id="epHandle" placeholder="@kanal" value="${document.getElementById('pHandle')?.textContent||''}">
+    <input class="form-inp" id="epBio" placeholder="Bio...">
+    <input class="form-inp" id="epPhone" placeholder="+994...">
+    <button class="form-btn" onclick="saveProfile()">Yadda saxla</button>
+  </div>`},
+  notifications:{title:'Bildirişlər', render:()=>`<div style="margin:12px">${[['Abunəlik','Yeni video çıxanda',true],['Şərhlər','Şərh gəldikdə',true],['Bəyənmələr','Video bəyənildikdə',false],['ChatBing','Yeni mesaj',true]].map((r,i,a)=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bdr);${i===0?'border-radius:12px 12px 0 0':i===a.length-1?'border-radius:0 0 12px 12px;border-bottom:none':''}"><div style="flex:1"><div style="color:#fff;font-size:13px">${r[0]}</div><div style="color:var(--txt3);font-size:11px">${r[1]}</div></div><div class="toggle ${r[2]?'':'off'}" onclick="this.classList.toggle('off')"><div class="toggle-k"></div></div></div>`).join('')}</div>`},
+  language:{title:'Dil', render:()=>`<div style="margin:12px">${['🇦🇿 Azərbaycan dili ✓','🇬🇧 English','🇹🇷 Türkçe','🇷🇺 Русский'].map((l,i,a)=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bdr);cursor:pointer;${i===0?'border-radius:12px 12px 0 0':i===a.length-1?'border-radius:0 0 12px 12px;border-bottom:none':''}" onclick="showToast('${l}')"><span style="color:${i===0?'#fff':'var(--txt2)'};font-size:13px;flex:1">${l}</span>${i===0?'<i class="ti ti-check" style="color:var(--acc)"></i>':''}</div>`).join('')}</div>`},
+  privacy:{title:'Gizlilik & Təhlükəsizlik', render:()=>`<div style="margin:12px">${[['Hesabı gizlə','Yalnız dostlar',false],['İki addımlı doğrulama','Əlavə təhlükəsizlik',false],['Fəaliyyət statusu','Online görünsün',true]].map((r,i,a)=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bdr);${i===0?'border-radius:12px 12px 0 0':i===a.length-1?'border-radius:0 0 12px 12px;border-bottom:none':''}"><div style="flex:1"><div style="color:#fff;font-size:13px">${r[0]}</div><div style="color:var(--txt3);font-size:11px">${r[1]}</div></div><div class="toggle ${r[2]?'':'off'}" onclick="this.classList.toggle('off')"><div class="toggle-k"></div></div></div>`).join('')}</div>`},
+  help:{title:'Yardım & Dəstək', render:()=>`<div style="margin:12px">${[['Tez-tez soruşulan suallar'],['Bizimlə əlaqə'],['Xəta bildiriş'],['Şikayət et']].map((r,i,a)=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bdr);cursor:pointer;${i===0?'border-radius:12px 12px 0 0':i===a.length-1?'border-radius:0 0 12px 12px;border-bottom:none':''}" onclick="showToast('${r[0]}')"><span style="color:#fff;font-size:13px;flex:1">${r[0]}</span><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>`).join('')}</div>`},
+  about:{title:'Bing Haqqında', render:()=>`<div style="padding:36px 20px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:0.5px solid var(--bdr)"><div style="font-size:40px;font-weight:800;color:#fff;letter-spacing:-1px">Bing<span style="color:var(--acc)">.</span></div><div style="color:var(--txt3);font-size:13px">Versiya 1.0.0</div><div style="background:var(--grn);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-top:6px">🚫 Tamamilə Reklamsız</div></div><div style="margin:12px">${[['Video platformu','YouTube kimi uzun videolar'],['Short videolar','Şaquli kaydırmalı videolar'],['ChatBing','WhatsApp kimi mesajlaşma'],['Nömrə ilə əlaqə','Telefon nömrəsi ilə dost tap'],['Kanal sistemi','Öz kanalını aç'],['Səs əmrləri','Səslə mesaj göndər']].map((r,i,a)=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bdr);${i===0?'border-radius:12px 12px 0 0':i===a.length-1?'border-radius:0 0 12px 12px;border-bottom:none':''}"><i class="ti ti-check" style="color:var(--grn);flex-shrink:0"></i><div><div style="color:#fff;font-size:13px">${r[0]}</div><div style="color:var(--txt3);font-size:11px;margin-top:1px">${r[1]}</div></div></div>`).join('')}</div><div style="text-align:center;color:var(--txt3);font-size:12px;padding:16px">© 2025 Bing · Bütün hüquqlar qorunur</div>`},
+};
+function openGScreen(key){
+  const sc=G[key];if(!sc)return;
+  document.getElementById('gScreenTitle').textContent=sc.title;
+  document.getElementById('gScreenBody').innerHTML=sc.render();
+  document.getElementById('gScreen').style.display='flex';
+}
+function closeGScreen(){document.getElementById('gScreen').style.display='none';}
+
+function saveProfile(){
+  const n=document.getElementById('epName')?.value.trim()||myName;
+  const h=document.getElementById('epHandle')?.value.trim()||'@senim_kanalin';
+  myName=n;myInit=n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'SN';
+  document.getElementById('pName').textContent=n;
+  document.getElementById('pHandle').textContent=h.startsWith('@')?h:'@'+h;
+  document.getElementById('bigAv').textContent=myInit;
+  closeGScreen();showToast('Profil yeniləndi ✅');
+}
+
+/* ═══ TAB SWITCH ═══ */
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='s') renderShortsTab();
+  else{if(progInt){clearInterval(progInt);progInt=null;}}
+  if(name==='chat'){
+    if(window.innerWidth<860){
+      document.getElementById('chatFriendCol').style.display='flex';
+      if(curFriend===null) document.getElementById('chatConvCol').style.display='none';
+    } else {
+      document.getElementById('chatFriendCol').style.display='flex';
+      document.getElementById('chatConvCol').style.display='flex';
+    }
+  }
+}
+
+/* ═══ MISC ═══ */
+function toggleLike(btn){const i=btn.querySelector('i');const liked=i.style.color==='#E24B4A';i.style.color=liked?'':'#E24B4A';if(!liked)showToast('❤️ Bəyəndiniz!');}
+function toggleFollow(btn){if(btn.textContent.includes('+')){btn.textContent='✓ İzlənilir';btn.style.background='rgba(255,255,255,0.15)';}else{btn.textContent='+ İzlə';btn.style.background='transparent';}}
+function toggleSub(btn){if(btn.textContent==='Abunə ol'){btn.textContent='Abunəsiniz';btn.style.cssText='background:var(--bg3);color:var(--txt2);border:0.5px solid var(--bdr);font-size:12px;font-weight:600;padding:7px 14px;border-radius:20px;cursor:pointer';showToast('Kanala abunə oldunuz!');}else{btn.textContent='Abunə ol';btn.style.cssText='background:var(--acc);border:none;color:#fff;font-size:12px;font-weight:600;padding:7px 14px;border-radius:20px;cursor:pointer';}}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+/* ═══ REGISTER & AUTH ═══ */
+const ADMIN_PHONE='702008702';
+const ADMIN_PASS='ekbe433ekbe43333bing.com';
+let isAdmin=false;
+let myPhone='';
+let likedVideos=[];
+let savedVideos=[];
+
+/* persistence handled by server */
+
+async function doReg(){
+  const n=document.getElementById('rName').value.trim();
+  const phone=document.getElementById('rPhone').value.trim();
+  const pass=document.getElementById('rPass').value;
+  const h=document.getElementById('rHandle').value.trim();
+  if(!phone){showToast('Nömrə yazın');return;}
+  const btn=document.querySelector('.reg-overlay .form-btn');
+  if(btn){btn.textContent='Giriş edilir...';btn.disabled=true;}
+  try{
+    const r=await fetch(API+'/api/auth/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({phone,password:pass,name:n,handle:h})
+    });
+    const d=await r.json();
+    if(d.ok){
+      TOKEN=d.token;
+      localStorage.setItem('bing_token',TOKEN);
+      applyUser(d.user);
+    } else {
+      showToast(d.msg||'Giriş xətası');
+    }
+  }catch(e){showToast('Server bağlantısı yoxdur');}
+  finally{if(btn){btn.textContent='Qeydiyyat / Giriş';btn.disabled=false;}}
+}
+async function doDemo(){
+  const r=await fetch(API+'/api/auth/login',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({phone:'0000000000',name:'Demo İstifadəçi',handle:'@demo'})
+  });
+  const d=await r.json();
+  if(d.ok){TOKEN=d.token;localStorage.setItem('bing_token',TOKEN);applyUser(d.user);}
+}
+function applyUser(u){
+  CURRENT_USER=u;
+  isAdmin=u.admin||false;
+  myName=u.name;
+  myHandle=u.handle;
+  myInit=u.init||u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'SN';
+  myPhone=u.phone||TOKEN;
+  likedVideos=u.liked||[];
+  savedVideos=u.saved||[];
+  HISTORY=[]; // will load from API
+  document.getElementById('regOv').style.display='none';
+  document.getElementById('pName').innerHTML=myName+(isAdmin?' <i class="ti ti-rosette-discount-check-filled" style="color:#3897F0;font-size:16px;vertical-align:middle"></i>':'');
+  document.getElementById('pHandle').textContent=myHandle;
+  document.getElementById('bigAv').textContent=myInit;
+  if(isAdmin){
+    document.getElementById('bigAv').style.background='#3897F0';
+    document.getElementById('bigAv').style.border='2px solid #3897F0';
+  } else {
+    document.getElementById('bigAv').style.background='var(--acc)';
+    document.getElementById('bigAv').style.border='2px solid rgba(255,255,255,0.15)';
+  }
+  document.getElementById('stFol').textContent=isAdmin?'∞':'0';
+  document.getElementById('stFing').textContent=(u.friends||[]).length;
+  document.getElementById('stVid').textContent='0';
+  // Load data
+  loadVideos();
+  loadFriends();
+  showToast(isAdmin?'Xoş gəldiniz, Yönetici! 👑':'Xoş gəldiniz, '+myName.split(' ')[0]+'! 🎉');
+  setTimeout(()=>{
+    if(!micAllowed) document.getElementById('permOv').style.display='flex';
+  },1200);
+}
+
+/* ═══ LOGOUT ═══ */
+function confirmLogout(){
+  document.getElementById('logoutOv').style.display='flex';
+}
+function doLogout(){
+  localStorage.removeItem('bing_token');
+  TOKEN=''; CURRENT_USER=null;
+  document.getElementById('logoutOv').style.display='none';
+  // Reset user state
+  isAdmin=false;
+  myName='';myHandle='';myInit='';myPhone='';
+  micAllowed=false;
+  curFriend=null;
+  likedVideos=[];savedVideos=[];
+  HISTORY.length=0;
+  FRIENDS.length=0;
+  Object.keys(COMMENTS).forEach(k=>delete COMMENTS[k]);
+  // Reset profile UI
+  document.getElementById('pName').innerHTML='Sənin Adın';
+  document.getElementById('pHandle').textContent='@senim_kanalin';
+  document.getElementById('bigAv').textContent='SN';
+  document.getElementById('bigAv').style.background='var(--acc)';
+  document.getElementById('bigAv').style.border='2px solid rgba(255,255,255,0.15)';
+  document.getElementById('stFol').textContent='0';
+  document.getElementById('stFing').textContent='0';
+  document.getElementById('stVid').textContent='0';
+  document.getElementById('micToggle').classList.add('off');
+  renderFriends();
+  // Close any open screens
+  closeWatch();
+  closeChannel();
+  closeGScreen();
+  closeConv();
+  // Clear register form fields
+  document.getElementById('rName').value='';
+  document.getElementById('rPhone').value='';
+  document.getElementById('rHandle').value='';
+  document.getElementById('rPass').value='';
+  // Go back to Bing tab
+  switchTab('bing');
+  // Show registration screen again
+  document.getElementById('regOv').style.display='flex';
+  showToast('Hesabdan çıxış edildi');
+}
+
+/* ═══ EDIT / DELETE VIDEO ═══ */
+function editVideo(id, idx){
+  const v=VIDEOS[idx];
+  const newTitle=prompt('Yeni başlıq:',v.title);
+  if(!newTitle)return;
+  fetch(API+'/api/videos/'+id,{
+    method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({token:TOKEN,title:newTitle})
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){v.title=newTitle;renderBingFeed();showToast('Video yeniləndi ✅');}
+    else showToast(d.msg||'Xəta');
+  });
+}
+function deleteVideo(id){
+  if(!confirm('Bu videoyu silmək istəyirsiniz?'))return;
+  fetch(API+'/api/videos/'+id,{
+    method:'DELETE',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({token:TOKEN})
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){VIDEOS=VIDEOS.filter(v=>v.id!==id);renderBingFeed();showToast('Video silindi');}
+    else showToast(d.msg||'Xəta');
+  });
+}
+
+/* ═══ SEARCH ═══ */
+function openSearch(){
+  const q=prompt('Axtarış:');
+  if(!q)return;
+  fetch(API+'/api/search?q='+encodeURIComponent(q))
+  .then(r=>r.json()).then(d=>{
+    if(!d.ok)return;
+    const feed=document.getElementById('bingFeed');
+    if(d.videos.length===0&&d.shorts.length===0){
+      feed.innerHTML=`<div class="empty-feed"><i class="ti ti-search"></i><div class="empty-feed-title">Nəticə tapılmadı</div><div class="empty-feed-sub">"${q}" üçün heç nə yoxdur</div><button class="empty-feed-btn" onclick="loadVideos()">Geri qayıt</button></div>`;
+      switchTab('bing');
+      return;
+    }
+    VIDEOS=d.videos;
+    renderBingFeed();
+    switchTab('bing');
+    showToast(d.videos.length+d.shorts.length+' nəticə tapıldı');
+  });
+}
+
+/* ═══ INIT ═══ */
+(async function init(){
+  // Auto-login if token saved
+  if(TOKEN){
+    try{
+      const r=await fetch(API+'/api/auth/me/'+TOKEN);
+      const d=await r.json();
+      if(d.ok){applyUser(d.user);return;}
+    }catch(e){}
+    localStorage.removeItem('bing_token');
+    TOKEN='';
+  }
+  // No token - show register screen
+  loadVideos(); // still show videos for non-logged-in
+  renderFriends();
+})();
+</script>
+</body>
+</html>

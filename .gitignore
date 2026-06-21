@@ -1,0 +1,5 @@
+node_modules/
+uploads/videos/*.mp4
+uploads/videos/*.webm
+uploads/videos/*.mov
+data/msg_*.json
