@@ -1024,7 +1024,21 @@ async function doAddFriend(type){
     }
   }catch(e){showToast('Xəta baş verdi');}
 }
-function openConv(i){
+let msgPollTimer=null;
+function fmtTime(ts){const t=new Date(ts);return t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');}
+async function loadMsgs(i,silent){
+  const f=FRIENDS[i];if(!f||!f.phone)return;
+  try{
+    const r=await fetch(API+'/api/messages/'+TOKEN+'/'+f.phone);
+    const d=await r.json();
+    if(d.ok){
+      f.msgs=d.messages.map(m=>({f:m.from===TOKEN?'me':'them',t:m.text,voice:m.voice,dur:m.dur,time:fmtTime(m.ts)}));
+      if(curFriend===i)renderMsgs();
+      if(!silent)renderFriends();
+    }
+  }catch(e){}
+}
+async function openConv(i){
   curFriend=i;FRIENDS[i].unread=0;
   if(window.innerWidth<860) document.getElementById('chatFriendCol').style.display='none';
   document.getElementById('emptyConv').style.display='none';
@@ -1033,13 +1047,17 @@ function openConv(i){
   const cs=document.getElementById('convStatus');cs.textContent=FRIENDS[i].online?'Online':'Offline';cs.style.color=FRIENDS[i].online?'var(--grn)':'var(--txt3)';
   document.getElementById('chatConvCol').style.display='flex';
   renderMsgs();renderFriends();
+  await loadMsgs(i);
   setTimeout(()=>{const m=document.getElementById('messages');if(m)m.scrollTop=m.scrollHeight;},50);
+  if(msgPollTimer)clearInterval(msgPollTimer);
+  msgPollTimer=setInterval(()=>{if(curFriend!==null)loadMsgs(curFriend);},3000);
 }
 function closeConv(){
   document.getElementById('chatFriendCol').style.display='flex';
   document.getElementById('convInner').style.display='none';
   document.getElementById('emptyConv').style.display='flex';
   if(window.innerWidth<860) document.getElementById('chatConvCol').style.display='none';
+  if(msgPollTimer){clearInterval(msgPollTimer);msgPollTimer=null;}
 }
 function renderMsgs(){
   if(curFriend===null)return;
@@ -1052,14 +1070,24 @@ function renderMsgs(){
   }).join('');
   ms.scrollTop=ms.scrollHeight;
 }
-function sendMsg(){
+async function sendMsg(){
   if(curFriend===null)return;
   const inp=document.getElementById('msgInp');const txt=inp.value.trim();if(!txt)return;
+  const f=FRIENDS[curFriend];
+  inp.value='';
   const ts=now();
-  if(!FRIENDS[curFriend].msgs) FRIENDS[curFriend].msgs=[];
-  FRIENDS[curFriend].msgs.push({f:'me',t:txt,time:ts});
-  FRIENDS[curFriend].last=txt;FRIENDS[curFriend].time='İndi';
-  inp.value='';renderMsgs();renderFriends();
+  if(!f.msgs) f.msgs=[];
+  f.msgs.push({f:'me',t:txt,time:ts});
+  f.last=txt;f.time='İndi';
+  renderMsgs();renderFriends();
+  try{
+    const r=await fetch(API+'/api/messages/send',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:TOKEN,toPhone:f.phone,text:txt})
+    });
+    const d=await r.json();
+    if(!d.ok){showToast('Mesaj göndərilmədi, yenidən cəhd edin');}
+  }catch(e){showToast('Şəbəkə xətası — mesaj göndərilmədi');}
 }
 function now(){const t=new Date();return t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');}
 
@@ -1072,10 +1100,16 @@ function toggleMic(){
     btn.classList.remove('rec');btn.querySelector('i').className='ti ti-microphone';
     if(mediaRec&&mediaRec.state!=='inactive')mediaRec.stop();
     if(curFriend!==null){
+      const f=FRIENDS[curFriend];
       const ts=now();
-      FRIENDS[curFriend].msgs.push({f:'me',voice:true,dur:'0:05',time:ts});
-      FRIENDS[curFriend].last='🎤 Səsli mesaj';
+      if(!f.msgs)f.msgs=[];
+      f.msgs.push({f:'me',voice:true,dur:'0:05',time:ts});
+      f.last='🎤 Səsli mesaj';
       renderMsgs();renderFriends();showToast('Səsli mesaj göndərildi 🎤');
+      fetch(API+'/api/messages/send',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({token:TOKEN,toPhone:f.phone,text:'',voice:true,dur:'0:05'})
+      }).catch(()=>{});
     }
   } else {
     navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
