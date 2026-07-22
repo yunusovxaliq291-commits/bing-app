@@ -325,6 +325,8 @@ body{display:flex;justify-content:center;align-items:center;}
 .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(28,28,28,0.97);border:0.5px solid var(--bdr);color:#fff;font-size:13px;padding:10px 18px;border-radius:20px;z-index:99999;opacity:0;transition:opacity .25s;white-space:nowrap;pointer-events:none;}
 .toast.show{opacity:1;}
 </style>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -463,14 +465,15 @@ body{display:flex;justify-content:center;align-items:center;}
                 <div class="conv-status" id="convStatus"></div>
               </div>
               <div class="conv-acts">
-                <i class="ti ti-phone" onclick="showToast('Zəng — tezliklə!')"></i>
-                <i class="ti ti-video" onclick="showToast('Video zəng — tezliklə!')"></i>
+                <i class="ti ti-phone" onclick="startCall(false)"></i>
+                <i class="ti ti-video" onclick="startCall(true)"></i>
               </div>
             </div>
             <div class="messages" id="messages"></div>
             <div class="msg-bar">
               <button class="mic-btn" id="micBtn" onclick="toggleMic()"><i class="ti ti-microphone"></i></button>
               <input class="msg-inp" id="msgInp" placeholder="Mesaj yazın..." onkeydown="if(event.key==='Enter')sendMsg()">
+              <button class="mic-btn" id="dictateBtn" onclick="toggleDictation()" title="Səslə yaz"><i class="ti ti-microphone-2" id="dictateIcon"></i></button>
               <button class="send-btn" onclick="sendMsg()"><i class="ti ti-send"></i></button>
             </div>
           </div>
@@ -501,21 +504,29 @@ body{display:flex;justify-content:center;align-items:center;}
             <div class="siz-row" onclick="openGScreen('liked')"><i class="ti ti-thumb-up ri"></i><div class="siz-rt"><div class="siz-rl">Bəyəndiklərim</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
           </div>
           <div class="siz-sec">
-            <div class="siz-sec-lbl">Hesab</div>
-            <div class="siz-row" onclick="openGScreen('editprofile')"><i class="ti ti-user-edit ri"></i><div class="siz-rt"><div class="siz-rl">Profili redaktə et</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
-            <div class="siz-row" onclick="openGScreen('notifications')"><i class="ti ti-bell ri"></i><div class="siz-rt"><div class="siz-rl">Bildirişlər</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
-            <div class="siz-row"><i class="ti ti-microphone ri"></i><div class="siz-rt"><div class="siz-rl">Səs icazəsi</div><div class="siz-rs">Səsli mesaj & səs əmrləri</div></div><div class="toggle off" id="micToggle" onclick="toggleMicPerm()"><div class="toggle-k"></div></div></div>
-            <div class="siz-row" onclick="openGScreen('language')"><i class="ti ti-language ri"></i><div class="siz-rt"><div class="siz-rl">Dil</div><div class="siz-rs">Azərbaycan dili</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-sec-lbl" data-i18n="secAccount">Hesab</div>
+            <div class="siz-row" onclick="openGScreen('editprofile')"><i class="ti ti-user-edit ri"></i><div class="siz-rt"><div class="siz-rl" data-i18n="editProfile">Profili redaktə et</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="openGScreen('notifications')"><i class="ti ti-bell ri"></i><div class="siz-rt"><div class="siz-rl" data-i18n="notifications">Bildirişlər</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row"><i class="ti ti-microphone ri"></i><div class="siz-rt"><div class="siz-rl" data-i18n="micPerm">Səs icazəsi</div><div class="siz-rs">Səsli mesaj & səs əmrləri</div></div><div class="toggle off" id="micToggle" onclick="toggleMicPerm()"><div class="toggle-k"></div></div></div>
+            <div class="siz-row" onclick="openGScreen('language')"><i class="ti ti-language ri"></i><div class="siz-rt"><div class="siz-rl" data-i18n="lang">Dil</div><div class="siz-rs" id="langSubLbl">Azərbaycan dili</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
           </div>
           <div class="siz-sec">
-            <div class="siz-sec-lbl">Tətbiq</div>
-            <div class="siz-row" onclick="openGScreen('privacy')"><i class="ti ti-shield-check ri"></i><div class="siz-rt"><div class="siz-rl">Gizlilik & Təhlükəsizlik</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
-            <div class="siz-row" onclick="openGScreen('help')"><i class="ti ti-help-circle ri"></i><div class="siz-rt"><div class="siz-rl">Yardım & Dəstək</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
-            <div class="siz-row" onclick="openGScreen('about')"><i class="ti ti-info-circle ri"></i><div class="siz-rt"><div class="siz-rl">Bing haqqında</div><div class="siz-rs">Versiya 1.0.0 · Reklamsız</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
-            <div class="siz-row" onclick="confirmLogout()"><i class="ti ti-logout ri" style="color:var(--red)"></i><div class="siz-rt"><div class="siz-rl" style="color:var(--red)">Çıxış</div></div></div>
+            <div class="siz-sec-lbl" data-i18n="secApp">Tətbiq</div>
+            <div class="siz-row" onclick="openGScreen('privacy')"><i class="ti ti-shield-check ri"></i><div class="siz-rt"><div class="siz-rl" data-i18n="privacy">Gizlilik & Təhlükəsizlik</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="openGScreen('help')"><i class="ti ti-help-circle ri"></i><div class="siz-rt"><div class="siz-rl" data-i18n="help">Yardım & Dəstək</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="openGScreen('about')"><i class="ti ti-info-circle ri"></i><div class="siz-rt"><div class="siz-rl" data-i18n="about">Bing haqqında</div><div class="siz-rs">Versiya 1.0.0 · Reklamsız</div></div><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>
+            <div class="siz-row" onclick="confirmLogout()"><i class="ti ti-logout ri" style="color:var(--red)"></i><div class="siz-rt"><div class="siz-rl" style="color:var(--red)" data-i18n="logout">Çıxış</div></div></div>
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="tab" id="tab-oybing">
+      <div style="padding:12px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--bdr)">
+        <div style="font-size:20px;font-weight:800;color:#fff">Oybing<span style="color:var(--acc)">.</span></div>
+        <button onclick="openNewWorldPrompt()" style="padding:8px 16px;background:var(--acc);border:none;border-radius:20px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-plus"></i> Yeni dünya</button>
+      </div>
+      <div id="oybingList" style="padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;overflow-y:auto"></div>
     </div>
 
   </div><!-- content -->
@@ -534,9 +545,13 @@ body{display:flex;justify-content:center;align-items:center;}
       <i class="ti ti-message-circle"></i>
       <span class="chat-badge">ChatBing</span>
     </button>
+    <button class="nav-tab" id="nav-oybing" onclick="switchTab('oybing')">
+      <i class="ti ti-cube"></i>
+      <span class="nav-tab-lbl">OyBing</span>
+    </button>
     <button class="nav-tab" id="nav-siz" onclick="switchTab('siz')">
       <i class="ti ti-user"></i>
-      <span class="nav-tab-lbl">Siz</span>
+      <span class="nav-tab-lbl" data-i18n="navYou">Siz</span>
     </button>
   </div>
 </div><!-- app -->
@@ -598,19 +613,86 @@ body{display:flex;justify-content:center;align-items:center;}
 <div class="reg-overlay" id="regOv">
   <div class="reg-inner">
     <div class="reg-logo">Bing<span>.</span></div>
-    <div class="reg-sub">Video · Short · Söhbət — hamısı bir yerdə</div>
-    <input class="form-inp" id="rName" placeholder="Ad Soyad">
-    <input class="form-inp" id="rPhone" placeholder="Nömrə (+994 xx xxx xx xx)" type="tel">
-    <input class="form-inp" id="rHandle" placeholder="Kanal adı (@kanal)">
-    <input class="form-inp" id="rPass" placeholder="Şifrə" type="password">
-    <button class="form-btn" onclick="doReg()">Qeydiyyat / Giriş</button>
-    <div class="reg-or">və ya</div>
-    <button class="form-sec" onclick="doDemo()">Demo olaraq davam et</button>
-    <div class="reg-foot" style="margin-top:12px">Artıq hesabın var? <span onclick="doDemo()">Giriş et</span></div>
+    <div class="reg-sub" data-i18n="regSub">Video · Short · Söhbət — hamısı bir yerdə</div>
+    <input class="form-inp" id="rName" placeholder="Ad Soyad" data-i18n-ph="phName">
+    <input class="form-inp" id="rPhone" placeholder="Nömrə (+994 xx xxx xx xx)" type="tel" data-i18n-ph="phPhone">
+    <input class="form-inp" id="rHandle" placeholder="Kanal adı (@kanal)" data-i18n-ph="phHandle">
+    <input class="form-inp" id="rPass" placeholder="Şifrə" type="password" data-i18n-ph="phPass">
+    <button class="form-btn" id="regBtn" onclick="doReg()" data-i18n="regBtn">Qeydiyyat / Giriş</button>
+    <div class="reg-or" data-i18n="or">və ya</div>
+    <button class="form-sec" onclick="doDemo()" data-i18n="demoBtn">Demo olaraq davam et</button>
+    <div class="reg-foot" style="margin-top:12px"><span data-i18n="haveAcc">Artıq hesabın var?</span> <span onclick="doDemo()" data-i18n="login">Giriş et</span></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Incoming call popup -->
+<div id="incomingCallModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center;flex-direction:column;color:#fff;text-align:center;">
+  <div id="incomingCallAvatar" style="width:90px;height:90px;border-radius:50%;background:var(--acc,#3897F0);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;margin-bottom:14px;"></div>
+  <div id="incomingCallName" style="font-size:20px;font-weight:700;margin-bottom:4px;"></div>
+  <div id="incomingCallType" style="font-size:13px;color:#ccc;margin-bottom:34px;"></div>
+  <div style="display:flex;gap:50px;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;" onclick="declineIncomingCall()">
+      <div style="width:60px;height:60px;border-radius:50%;background:#e0245e;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="ti ti-phone-off" style="font-size:26px;"></i></div>
+      <span style="font-size:12px;">Rədd et</span>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;" onclick="acceptIncomingCall()">
+      <div style="width:60px;height:60px;border-radius:50%;background:#1d9e75;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="ti ti-phone" style="font-size:26px;"></i></div>
+      <span style="font-size:12px;">Qəbul et</span>
+    </div>
+  </div>
+</div>
+
+<!-- Active call screen -->
+<div id="activeCallScreen" style="display:none;position:fixed;inset:0;background:#111;z-index:9999;flex-direction:column;color:#fff;">
+  <video id="remoteVideo" autoplay playsinline style="flex:1;width:100%;object-fit:cover;background:#000;"></video>
+  <video id="localVideo" autoplay playsinline muted style="position:absolute;top:16px;right:16px;width:110px;height:150px;object-fit:cover;border-radius:10px;background:#000;border:1px solid #444;"></video>
+  <div id="callStatusText" style="position:absolute;top:16px;left:16px;font-size:13px;background:rgba(0,0,0,.5);padding:6px 12px;border-radius:14px;"></div>
+  <div style="position:absolute;bottom:26px;left:0;right:0;display:flex;justify-content:center;gap:26px;">
+    <div style="width:54px;height:54px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="toggleCallMic()"><i class="ti ti-microphone" id="callMicIcon" style="font-size:22px;"></i></div>
+    <div style="width:54px;height:54px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="toggleCallCam()"><i class="ti ti-video" id="callCamIcon" style="font-size:22px;"></i></div>
+    <div style="width:60px;height:60px;border-radius:50%;background:#e0245e;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="hangupCall()"><i class="ti ti-phone-off" style="font-size:24px;"></i></div>
+  </div>
+</div>
+
+<!-- OyBing 3D World Builder — Studio görünüşü -->
+<div id="worldScreen" style="display:none;position:fixed;inset:0;background:#87CEEB;z-index:9999;font-family:inherit;">
+  <canvas id="worldCanvas" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none;"></canvas>
+  <div id="worldCrosshair" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:14px;height:14px;pointer-events:none;">
+    <div style="position:absolute;top:6px;left:0;width:14px;height:2px;background:rgba(255,255,255,.8)"></div>
+    <div style="position:absolute;top:0;left:6px;width:2px;height:14px;background:rgba(255,255,255,.8)"></div>
+  </div>
+
+  <!-- Studio üst alətlər paneli -->
+  <div style="position:absolute;top:0;left:0;right:0;background:#2d2d30;border-bottom:1px solid #3e3e42;padding:8px 10px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.3);">
+    <button onclick="closeWorld()" style="width:34px;height:34px;border-radius:6px;background:#3e3e42;border:none;color:#ccc;font-size:16px;flex-shrink:0;"><i class="ti ti-arrow-left"></i></button>
+    <div style="width:1px;height:24px;background:#3e3e42;flex-shrink:0;"></div>
+    <button id="modePlaceBtn" onclick="setBuildMode('place')" style="width:34px;height:34px;border-radius:6px;background:#007acc;border:none;color:#fff;font-size:16px;flex-shrink:0;" title="Qoy"><i class="ti ti-cube-plus"></i></button>
+    <button id="modeRemoveBtn" onclick="setBuildMode('remove')" style="width:34px;height:34px;border-radius:6px;background:#3e3e42;border:none;color:#ccc;font-size:16px;flex-shrink:0;" title="Sil"><i class="ti ti-eraser"></i></button>
+    <div id="worldNameLbl" style="flex:1;text-align:center;color:#ddd;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Adsız dünya</div>
+    <button onclick="toggleStudioPanel()" style="width:34px;height:34px;border-radius:6px;background:#3e3e42;border:none;color:#ccc;font-size:16px;flex-shrink:0;" title="Explorer"><i class="ti ti-list-tree"></i></button>
+    <button onclick="saveWorld()" style="padding:0 16px;height:34px;border-radius:6px;background:#007acc;border:none;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">Publish</button>
+  </div>
+
+  <!-- Studio sağ panel: Explorer + Properties -->
+  <div id="studioPanel" style="position:absolute;top:50px;right:0;bottom:0;width:220px;background:#252526;border-left:1px solid #3e3e42;display:none;flex-direction:column;overflow:hidden;">
+    <div style="padding:8px 10px;background:#2d2d30;color:#ccc;font-size:11px;font-weight:700;letter-spacing:.5px;border-bottom:1px solid #3e3e42;">EXPLORER — WORKSPACE</div>
+    <div id="studioExplorer" style="flex:1;overflow-y:auto;padding:4px 0;"></div>
+    <div style="padding:8px 10px;background:#2d2d30;color:#ccc;font-size:11px;font-weight:700;letter-spacing:.5px;border-top:1px solid #3e3e42;border-bottom:1px solid #3e3e42;">PROPERTIES — MATERIAL</div>
+    <div id="blockPalette" style="padding:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;"></div>
+  </div>
+
+  <!-- mode toggle (uçmaq) -->
+  <div style="position:absolute;bottom:150px;right:16px;display:flex;flex-direction:column;gap:10px;">
+    <button onclick="worldMoveY(1)" style="width:50px;height:50px;border-radius:14px;background:rgba(0,0,0,.4);border:none;color:#fff;font-size:20px;"><i class="ti ti-arrow-up"></i></button>
+    <button onclick="worldMoveY(-1)" style="width:50px;height:50px;border-radius:14px;background:rgba(0,0,0,.4);border:none;color:#fff;font-size:20px;"><i class="ti ti-arrow-down"></i></button>
+  </div>
+  <!-- virtual joystick -->
+  <div id="joyBase" style="position:absolute;bottom:24px;left:24px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);">
+    <div id="joyStick" style="position:absolute;top:30px;left:30px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.5);"></div>
+  </div>
+</div>
 
 <script>
 /* ═══════════════ DATA (bot yoxdur) ═══════════════ */
@@ -631,7 +713,7 @@ let micAllowed=false, curFriend=null, curShort=0;
 let progVal=0, progInt=null;
 let playing=false, watchTimer=null, watchSec=0, watchTotal=0, watchVidIdx=null;
 let swipeY=0;
-let myName='', myHandle='', myInit='';
+let myName='', myHandle='', myInit='', myAvatar='';
 
 /* ── CLOCK ── */
 function updateClock(){const n=new Date();const el=document.getElementById('clock');if(el)el.textContent=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');}
@@ -983,7 +1065,7 @@ function renderFriends(){
     FRIENDS.forEach((f,i)=>{
       h+=`<div class="f-item" onclick="openConv(${i})">
         <div class="f-av-wrap"><div class="f-av" style="background:${f.color}22;color:${f.color};border:1.5px solid ${f.color}">${f.init}</div>${f.online?'<div class="online-dot"></div>':''}</div>
-        <div class="f-body"><div class="f-name">${f.name}</div><div class="f-last">${f.last||'Söhbət başladın'}</div></div>
+        <div class="f-body"><div class="f-name">${f.name}${f.admin?' <i class="ti ti-rosette-discount-check-filled" style="color:#3897F0;font-size:12px;vertical-align:middle"></i>':''}</div><div class="f-last">${f.last||'Söhbət başladın'}</div></div>
         <div class="f-meta"><span class="f-time">${f.time||''}</span>${f.unread?`<span class="unread-dot">${f.unread}</span>`:''}</div>
       </div>`;
     });
@@ -1043,7 +1125,7 @@ async function openConv(i){
   if(window.innerWidth<860) document.getElementById('chatFriendCol').style.display='none';
   document.getElementById('emptyConv').style.display='none';
   const ci=document.getElementById('convInner');ci.style.display='flex';
-  document.getElementById('convName').textContent=FRIENDS[i].name;
+  document.getElementById('convName').innerHTML=FRIENDS[i].name+(FRIENDS[i].admin?' <i class="ti ti-rosette-discount-check-filled" style="color:#3897F0;font-size:13px;vertical-align:middle"></i>':'');
   const cs=document.getElementById('convStatus');cs.textContent=FRIENDS[i].online?'Online':'Offline';cs.style.color=FRIENDS[i].online?'var(--grn)':'var(--txt3)';
   document.getElementById('chatConvCol').style.display='flex';
   renderMsgs();renderFriends();
@@ -1233,13 +1315,35 @@ const G={
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <button onclick="openGScreen('upload')" style="padding:14px;background:var(--acc);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:600;cursor:pointer"><i class="ti ti-upload" style="display:block;font-size:24px;margin-bottom:4px"></i>Yüklə</button>
-      <button onclick="showToast('Analitika tezliklə!')" style="padding:14px;background:var(--bg2);border:0.5px solid var(--bdr);border-radius:12px;color:#fff;font-size:13px;font-weight:600;cursor:pointer"><i class="ti ti-chart-bar" style="display:block;font-size:24px;margin-bottom:4px;color:var(--acc)"></i>Analitika</button>
+      <button onclick="openGScreen('analytics')" style="padding:14px;background:var(--bg2);border:0.5px solid var(--bdr);border-radius:12px;color:#fff;font-size:13px;font-weight:600;cursor:pointer"><i class="ti ti-chart-bar" style="display:block;font-size:24px;margin-bottom:4px;color:var(--acc)"></i>Analitika</button>
     </div>
     ${VIDEOS.filter(v=>v.handle===document.getElementById('pHandle')?.textContent).length===0
       ?`<div style="background:var(--bg2);border-radius:12px;padding:36px;display:flex;flex-direction:column;align-items:center;gap:10px"><i class="ti ti-video-off" style="font-size:40px;color:var(--txt3)"></i><span style="color:var(--txt3);font-size:13px">Hələ heç bir video yoxdur</span><button onclick="openGScreen('upload')" style="padding:8px 18px;background:var(--acc);border:none;border-radius:20px;color:#fff;font-size:12px;cursor:pointer;margin-top:4px">İlk videonu yüklə</button></div>`
       :'<div class="ch-vid-grid">'+VIDEOS.filter(v=>v.handle===document.getElementById('pHandle')?.textContent).map((v,i)=>`<div class="ch-vid-item" onclick="openWatch(${VIDEOS.indexOf(v)});closeGScreen()"><div class="ch-vid-thumb" style="background:${v.color}22"><i class="ti ti-player-play" style="color:${v.color}"></i></div><div class="ch-vid-title">${v.title}</div></div>`).join('')+'</div>'
     }
   </div>`},
+  analytics:{title:'Analitika', render:()=>{
+    const mine=[...VIDEOS,...SHORTS].filter(v=>v.ownerPhone===myPhone);
+    const totalViews=mine.reduce((s,v)=>s+(v.views||0),0);
+    const totalLikes=mine.reduce((s,v)=>s+(v.likes||0),0);
+    const totalComments=mine.reduce((s,v)=>s+((v.comments||[]).length),0);
+    const stat=(label,val,icon)=>`<div style="background:var(--bg2);border-radius:12px;padding:16px;flex:1;text-align:center"><i class="ti ${icon}" style="font-size:20px;color:var(--acc);display:block;margin-bottom:6px"></i><div style="color:#fff;font-size:20px;font-weight:800">${val}</div><div style="color:var(--txt3);font-size:11px;margin-top:2px">${label}</div></div>`;
+    return `<div style="padding:14px">
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        ${stat('Video',mine.length,'ti-video')}
+        ${stat('Baxış',totalViews,'ti-eye')}
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:18px">
+        ${stat('Bəyənmə',totalLikes,'ti-heart')}
+        ${stat('Şərh',totalComments,'ti-message-circle')}
+      </div>
+      <div style="color:var(--txt3);font-size:12px;margin:0 2px 8px">Videolar üzrə</div>
+      ${mine.length===0
+        ?`<div style="background:var(--bg2);border-radius:12px;padding:30px;text-align:center;color:var(--txt3);font-size:13px">Hələ video yoxdur</div>`
+        :mine.map(v=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg2);border-radius:10px;margin-bottom:8px"><div style="flex:1;min-width:0"><div style="color:#fff;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.title}</div></div><div style="color:var(--txt3);font-size:11px;display:flex;gap:10px;flex-shrink:0"><span><i class="ti ti-eye" style="font-size:12px;vertical-align:-1px"></i> ${v.views||0}</span><span><i class="ti ti-heart" style="font-size:12px;vertical-align:-1px"></i> ${v.likes||0}</span></div></div>`).join('')
+      }
+    </div>`;
+  }},
   history:{title:'İzlədiklərim', render:()=>HISTORY.length===0
     ?`<div style="padding:50px 20px;display:flex;flex-direction:column;align-items:center;gap:12px"><i class="ti ti-history" style="font-size:48px;color:var(--txt3)"></i><div style="color:#fff;font-size:15px;font-weight:600">Hələ heç nə izlənilməyib</div><div style="color:var(--txt3);font-size:13px;text-align:center">Video izlədikdə buraya düşəcək</div></div>`
     :HISTORY.map(h=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:0.5px solid #161616;cursor:pointer" onclick="openWatch(${h.idx});closeGScreen()"><div style="width:88px;height:50px;border-radius:8px;background:${h.color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-player-play" style="font-size:24px;color:${h.color}"></i></div><div style="flex:1;min-width:0"><div style="color:#fff;font-size:12px;font-weight:500;line-height:1.4">${h.title}</div><div style="color:var(--txt3);font-size:11px;margin-top:3px">${h.handle}</div></div><div style="color:var(--txt3);font-size:10px;flex-shrink:0">${h.date||''}</div></div>`).join('')},
@@ -1247,8 +1351,9 @@ const G={
   liked:{title:'Bəyəndiklərim', render:()=>`<div style="padding:50px 20px;display:flex;flex-direction:column;align-items:center;gap:12px"><i class="ti ti-thumb-up" style="font-size:48px;color:var(--txt3)"></i><div style="color:#fff;font-size:15px;font-weight:600">Hələ heç nə bəyənilməyib</div><div style="color:var(--txt3);font-size:13px;text-align:center">Videolarda 👍 düyməsini istifadə et</div></div>`},
   editprofile:{title:'Profili Redaktə Et', render:()=>`<div style="padding:14px">
     <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:20px">
-      <div style="width:72px;height:72px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff">${myInit||'SN'}</div>
-      <span style="color:var(--acc);font-size:12px;cursor:pointer" onclick="showToast('Şəkil seç')">Profil şəklini dəyiş</span>
+      <div id="epAvPreview" style="width:72px;height:72px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;${myAvatar?`background-image:url('${myAvatar}');background-size:cover;background-position:center;`:''}">${myAvatar?'':(myInit||'SN')}</div>
+      <input type="file" id="epAvFile" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+      <span style="color:var(--acc);font-size:12px;cursor:pointer" onclick="document.getElementById('epAvFile').click()">Profil şəklini dəyiş</span>
     </div>
     <input class="form-inp" id="epName" placeholder="Ad Soyad" value="${myName||''}">
     <input class="form-inp" id="epHandle" placeholder="@kanal" value="${document.getElementById('pHandle')?.textContent||''}">
@@ -1257,7 +1362,10 @@ const G={
     <button class="form-btn" onclick="saveProfile()">Yadda saxla</button>
   </div>`},
   notifications:{title:'Bildirişlər', render:()=>`<div style="margin:12px">${[['Abunəlik','Yeni video çıxanda',true],['Şərhlər','Şərh gəldikdə',true],['Bəyənmələr','Video bəyənildikdə',false],['ChatBing','Yeni mesaj',true]].map((r,i,a)=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bdr);${i===0?'border-radius:12px 12px 0 0':i===a.length-1?'border-radius:0 0 12px 12px;border-bottom:none':''}"><div style="flex:1"><div style="color:#fff;font-size:13px">${r[0]}</div><div style="color:var(--txt3);font-size:11px">${r[1]}</div></div><div class="toggle ${r[2]?'':'off'}" onclick="this.classList.toggle('off')"><div class="toggle-k"></div></div></div>`).join('')}</div>`},
-  language:{title:'Dil', render:()=>`<div style="margin:12px">${['🇦🇿 Azərbaycan dili ✓','🇬🇧 English','🇹🇷 Türkçe','🇷🇺 Русский'].map((l,i,a)=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bdr);cursor:pointer;${i===0?'border-radius:12px 12px 0 0':i===a.length-1?'border-radius:0 0 12px 12px;border-bottom:none':''}" onclick="showToast('${l}')"><span style="color:${i===0?'#fff':'var(--txt2)'};font-size:13px;flex:1">${l}</span>${i===0?'<i class="ti ti-check" style="color:var(--acc)"></i>':''}</div>`).join('')}</div>`},
+  language:{title:'Dil', render:()=>{
+    const langs=[['az','🇦🇿 Azərbaycan dili'],['en','🇬🇧 English'],['tr','🇹🇷 Türkçe'],['ru','🇷🇺 Русский']];
+    return `<div style="margin:12px">${langs.map(([code,l],i,a)=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bdr);cursor:pointer;${i===0?'border-radius:12px 12px 0 0':i===a.length-1?'border-radius:0 0 12px 12px;border-bottom:none':''}" onclick="setLanguage('${code}')"><span style="color:${code===CUR_LANG?'#fff':'var(--txt2)'};font-size:13px;flex:1">${l}</span>${code===CUR_LANG?'<i class="ti ti-check" style="color:var(--acc)"></i>':''}</div>`).join('')}</div>`;
+  }},
   privacy:{title:'Gizlilik & Təhlükəsizlik', render:()=>`<div style="margin:12px">${[['Hesabı gizlə','Yalnız dostlar',false],['İki addımlı doğrulama','Əlavə təhlükəsizlik',false],['Fəaliyyət statusu','Online görünsün',true]].map((r,i,a)=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bdr);${i===0?'border-radius:12px 12px 0 0':i===a.length-1?'border-radius:0 0 12px 12px;border-bottom:none':''}"><div style="flex:1"><div style="color:#fff;font-size:13px">${r[0]}</div><div style="color:var(--txt3);font-size:11px">${r[1]}</div></div><div class="toggle ${r[2]?'':'off'}" onclick="this.classList.toggle('off')"><div class="toggle-k"></div></div></div>`).join('')}</div>`},
   help:{title:'Yardım & Dəstək', render:()=>`<div style="margin:12px">${[['Tez-tez soruşulan suallar'],['Bizimlə əlaqə'],['Xəta bildiriş'],['Şikayət et']].map((r,i,a)=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bdr);cursor:pointer;${i===0?'border-radius:12px 12px 0 0':i===a.length-1?'border-radius:0 0 12px 12px;border-bottom:none':''}" onclick="showToast('${r[0]}')"><span style="color:#fff;font-size:13px;flex:1">${r[0]}</span><i class="ti ti-chevron-right" style="color:var(--txt3)"></i></div>`).join('')}</div>`},
   about:{title:'Bing Haqqında', render:()=>`<div style="padding:36px 20px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:0.5px solid var(--bdr)"><div style="font-size:40px;font-weight:800;color:#fff;letter-spacing:-1px">Bing<span style="color:var(--acc)">.</span></div><div style="color:var(--txt3);font-size:13px">Versiya 1.0.0</div><div style="background:var(--grn);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-top:6px">🚫 Tamamilə Reklamsız</div></div><div style="margin:12px">${[['Video platformu','YouTube kimi uzun videolar'],['Short videolar','Şaquli kaydırmalı videolar'],['ChatBing','WhatsApp kimi mesajlaşma'],['Nömrə ilə əlaqə','Telefon nömrəsi ilə dost tap'],['Kanal sistemi','Öz kanalını aç'],['Səs əmrləri','Səslə mesaj göndər']].map((r,i,a)=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bdr);${i===0?'border-radius:12px 12px 0 0':i===a.length-1?'border-radius:0 0 12px 12px;border-bottom:none':''}"><i class="ti ti-check" style="color:var(--grn);flex-shrink:0"></i><div><div style="color:#fff;font-size:13px">${r[0]}</div><div style="color:var(--txt3);font-size:11px;margin-top:1px">${r[1]}</div></div></div>`).join('')}</div><div style="text-align:center;color:var(--txt3);font-size:12px;padding:16px">© 2025 Bing · Bütün hüquqlar qorunur</div>`},
@@ -1270,14 +1378,41 @@ function openGScreen(key){
 }
 function closeGScreen(){document.getElementById('gScreen').style.display='none';}
 
-function saveProfile(){
+let selectedAvatarFile=null;
+function previewAvatar(input){
+  const f=input.files&&input.files[0];if(!f)return;
+  selectedAvatarFile=f;
+  const url=URL.createObjectURL(f);
+  const el=document.getElementById('epAvPreview');
+  el.style.backgroundImage=`url('${url}')`;el.style.backgroundSize='cover';el.style.backgroundPosition='center';el.textContent='';
+}
+async function saveProfile(){
   const n=document.getElementById('epName')?.value.trim()||myName;
   const h=document.getElementById('epHandle')?.value.trim()||'@senim_kanalin';
-  myName=n;myInit=n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'SN';
-  document.getElementById('pName').textContent=n;
-  document.getElementById('pHandle').textContent=h.startsWith('@')?h:'@'+h;
-  document.getElementById('bigAv').textContent=myInit;
-  closeGScreen();showToast('Profil yeniləndi ✅');
+  const bio=document.getElementById('epBio')?.value.trim();
+  if(selectedAvatarFile){
+    const fd=new FormData();fd.append('token',TOKEN);fd.append('avatar',selectedAvatarFile);
+    try{
+      const r=await fetch(API+'/api/auth/avatar',{method:'POST',body:fd});
+      const d=await r.json();
+      if(d.ok){myAvatar=d.user.avatar;renderBigAvatar();}
+    }catch(e){showToast('Şəkil yüklənmədi');}
+    selectedAvatarFile=null;
+  }
+  try{
+    const r=await fetch(API+'/api/auth/update',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:TOKEN,name:n,handle:h,bio})
+    });
+    const d=await r.json();
+    if(d.ok){
+      myName=n;myInit=n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'SN';
+      document.getElementById('pName').textContent=n;
+      document.getElementById('pHandle').textContent=h.startsWith('@')?h:'@'+h;
+      renderBigAvatar();
+      closeGScreen();showToast('Profil yeniləndi ✅');
+    } else showToast(d.msg||'Xəta baş verdi');
+  }catch(e){showToast('Şəbəkə xətası');}
 }
 
 /* ═══ TAB SWITCH ═══ */
@@ -1288,6 +1423,7 @@ function switchTab(name){
   document.getElementById('nav-'+name).classList.add('active');
   if(name==='s') renderShortsTab();
   else{if(progInt){clearInterval(progInt);progInt=null;}}
+  if(name==='oybing') loadOybingList();
   if(name==='chat'){
     if(window.innerWidth<860){
       document.getElementById('chatFriendCol').style.display='flex';
@@ -1349,20 +1485,34 @@ async function doDemo(){
   const d=await r.json();
   if(d.ok){TOKEN=d.token;localStorage.setItem('bing_token',TOKEN);applyUser(d.user);}
 }
+function renderBigAvatar(){
+  const el=document.getElementById('bigAv');
+  if(myAvatar){
+    el.style.backgroundImage=`url('${myAvatar}')`;
+    el.style.backgroundSize='cover';
+    el.style.backgroundPosition='center';
+    el.textContent='';
+  } else {
+    el.style.backgroundImage='';
+    el.textContent=myInit;
+  }
+}
 function applyUser(u){
   CURRENT_USER=u;
   isAdmin=u.admin||false;
+  initCallSocket();
   myName=u.name;
   myHandle=u.handle;
   myInit=u.init||u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'SN';
   myPhone=u.phone||TOKEN;
+  myAvatar=u.avatar||'';
   likedVideos=u.liked||[];
   savedVideos=u.saved||[];
   HISTORY=[]; // will load from API
   document.getElementById('regOv').style.display='none';
   document.getElementById('pName').innerHTML=myName+(isAdmin?' <i class="ti ti-rosette-discount-check-filled" style="color:#3897F0;font-size:16px;vertical-align:middle"></i>':'');
   document.getElementById('pHandle').textContent=myHandle;
-  document.getElementById('bigAv').textContent=myInit;
+  renderBigAvatar();
   if(isAdmin){
     document.getElementById('bigAv').style.background='#3897F0';
     document.getElementById('bigAv').style.border='2px solid #3897F0';
@@ -1471,8 +1621,456 @@ function openSearch(){
   });
 }
 
+/* ═══ DİL / TƏRCÜMƏ (i18n) ═══ */
+const TRANSLATIONS={
+  az:{regSub:'Video · Short · Söhbət — hamısı bir yerdə',phName:'Ad Soyad',phPhone:'Nömrə (+994 xx xxx xx xx)',phHandle:'Kanal adı (@kanal)',phPass:'Şifrə',regBtn:'Qeydiyyat / Giriş',or:'və ya',demoBtn:'Demo olaraq davam et',haveAcc:'Artıq hesabın var?',login:'Giriş et',navYou:'Siz',secAccount:'Hesab',editProfile:'Profili redaktə et',notifications:'Bildirişlər',micPerm:'Səs icazəsi',lang:'Dil',secApp:'Tətbiq',privacy:'Gizlilik & Təhlükəsizlik',help:'Yardım & Dəstək',about:'Bing haqqında',logout:'Çıxış',langNames:{az:'Azərbaycan dili',en:'English',tr:'Türkçe',ru:'Русский'}},
+  en:{regSub:'Video · Shorts · Chat — all in one place',phName:'Full name',phPhone:'Phone number (+994 xx xxx xx xx)',phHandle:'Channel name (@channel)',phPass:'Password',regBtn:'Sign up / Log in',or:'or',demoBtn:'Continue as demo',haveAcc:'Already have an account?',login:'Log in',navYou:'You',secAccount:'Account',editProfile:'Edit profile',notifications:'Notifications',micPerm:'Microphone permission',lang:'Language',secApp:'App',privacy:'Privacy & Security',help:'Help & Support',about:'About Bing',logout:'Log out',langNames:{az:'Azərbaycan dili',en:'English',tr:'Türkçe',ru:'Русский'}},
+  tr:{regSub:'Video · Kısa video · Sohbet — hepsi bir arada',phName:'Ad Soyad',phPhone:'Numara (+994 xx xxx xx xx)',phHandle:'Kanal adı (@kanal)',phPass:'Şifre',regBtn:'Kayıt Ol / Giriş Yap',or:'veya',demoBtn:'Demo olarak devam et',haveAcc:'Zaten hesabın var mı?',login:'Giriş yap',navYou:'Siz',secAccount:'Hesap',editProfile:'Profili düzenle',notifications:'Bildirimler',micPerm:'Mikrofon izni',lang:'Dil',secApp:'Uygulama',privacy:'Gizlilik & Güvenlik',help:'Yardım & Destek',about:'Bing hakkında',logout:'Çıkış yap',langNames:{az:'Azərbaycan dili',en:'English',tr:'Türkçe',ru:'Русский'}},
+  ru:{regSub:'Видео · Шортс · Чат — всё в одном месте',phName:'Имя и фамилия',phPhone:'Номер (+994 xx xxx xx xx)',phHandle:'Название канала (@канал)',phPass:'Пароль',regBtn:'Регистрация / Вход',or:'или',demoBtn:'Продолжить как демо',haveAcc:'Уже есть аккаунт?',login:'Войти',navYou:'Вы',secAccount:'Аккаунт',editProfile:'Редактировать профиль',notifications:'Уведомления',micPerm:'Разрешение микрофона',lang:'Язык',secApp:'Приложение',privacy:'Конфиденциальность и безопасность',help:'Помощь и поддержка',about:'О Bing',logout:'Выйти',langNames:{az:'Azərbaycan dili',en:'English',tr:'Türkçe',ru:'Русский'}}
+};
+let CUR_LANG=localStorage.getItem('bing_lang')||'az';
+function applyTranslations(){
+  const t=TRANSLATIONS[CUR_LANG]||TRANSLATIONS.az;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(t[k]!==undefined) el.textContent=t[k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const k=el.getAttribute('data-i18n-ph');
+    if(t[k]!==undefined) el.placeholder=t[k];
+  });
+  const langSub=document.getElementById('langSubLbl');
+  if(langSub) langSub.textContent=t.langNames[CUR_LANG];
+}
+function setLanguage(code){
+  CUR_LANG=code;
+  localStorage.setItem('bing_lang',code);
+  applyTranslations();
+  openGScreen('language'); // re-render with new checkmark
+  showToast('✅');
+}
+
+/* ═══ SƏSLƏ YAZMA (Dictation) ═══ */
+let dictationRec=null, dictationOn=false;
+function toggleDictation(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ showToast('Bu cihaz səslə yazmanı dəstəkləmir'); return; }
+  if(dictationOn){
+    if(dictationRec) dictationRec.stop();
+    return;
+  }
+  dictationRec=new SR();
+  dictationRec.lang='az-AZ';
+  dictationRec.interimResults=false;
+  dictationRec.continuous=false;
+  dictationRec.onstart=()=>{
+    dictationOn=true;
+    document.getElementById('dictateIcon').className='ti ti-microphone-2 rec';
+    document.getElementById('dictateBtn').classList.add('rec');
+    showToast('Dinləyirəm... 🎙️');
+  };
+  dictationRec.onresult=(e)=>{
+    const text=e.results[0][0].transcript;
+    const inp=document.getElementById('msgInp');
+    inp.value=(inp.value?inp.value+' ':'')+text;
+  };
+  dictationRec.onerror=()=>{ showToast('Səs tanınmadı, yenidən cəhd edin'); };
+  dictationRec.onend=()=>{
+    dictationOn=false;
+    document.getElementById('dictateIcon').className='ti ti-microphone-2';
+    document.getElementById('dictateBtn').classList.remove('rec');
+  };
+  try{ dictationRec.start(); }catch(e){ showToast('Mikrofona icazə lazımdır'); }
+}
+
+/* ═══ OYBİNG — 3D DÜNYA QURUCUSU ═══ */
+const PALETTE=[
+  {n:'Ot',c:0x4CAF50},{n:'Torpaq',c:0x8B5A2B},{n:'Daş',c:0x9E9E9E},
+  {n:'Taxta',c:0xA0714D},{n:'Qum',c:0xE0C068},{n:'Su',c:0x3B82F6},
+  {n:'Kərpic',c:0xB33A3A},{n:'Qar',c:0xFFFFFF}
+];
+let selectedBlockColor=PALETTE[0].c;
+let worldScene,worldCamera,worldRenderer,worldGroup;
+let blocksMap=new Map();
+let currentWorldId=null,currentWorldName='';
+let buildMode='place';
+let worldActive=false,worldAnimHandle=null;
+let playerPos={x:0,y:2,z:6},yaw=0,pitch=0;
+let joyVec={x:0,y:0};
+let joyTouchId=null,lookTouchId=null,lookStart={x:0,y:0},lookMoved=0;
+const keysDown={};
+
+let studioPanelOpen=false;
+
+function renderBlockPalette(){
+  const el=document.getElementById('blockPalette');
+  el.innerHTML=PALETTE.map((p,i)=>`<div onclick="selectBlockColor(${i})" title="${p.n}" style="aspect-ratio:1;border-radius:6px;background:#${p.c.toString(16).padStart(6,'0')};border:2px solid ${p.c===selectedBlockColor?'#007acc':'#3e3e42'};cursor:pointer;position:relative;">${p.c===selectedBlockColor?'<i class="ti ti-check" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;text-shadow:0 0 2px rgba(0,0,0,.8)"></i>':''}</div>`).join('');
+}
+function selectBlockColor(i){ selectedBlockColor=PALETTE[i].c; renderBlockPalette(); }
+function setBuildMode(m){
+  buildMode=m;
+  document.getElementById('modePlaceBtn').style.background=m==='place'?'#007acc':'#3e3e42';
+  document.getElementById('modePlaceBtn').style.color=m==='place'?'#fff':'#ccc';
+  document.getElementById('modeRemoveBtn').style.background=m==='remove'?'#007acc':'#3e3e42';
+  document.getElementById('modeRemoveBtn').style.color=m==='remove'?'#fff':'#ccc';
+}
+function worldMoveY(d){ playerPos.y=Math.max(1,Math.min(40,playerPos.y+d)); }
+function toggleStudioPanel(){
+  studioPanelOpen=!studioPanelOpen;
+  document.getElementById('studioPanel').style.display=studioPanelOpen?'flex':'none';
+  if(studioPanelOpen) renderExplorer();
+}
+function renderExplorer(){
+  const el=document.getElementById('studioExplorer'); if(!el)return;
+  const groups={};
+  blocksMap.forEach(b=>{ groups[b.color]=(groups[b.color]||0)+1; });
+  const entries=Object.keys(groups);
+  if(entries.length===0){
+    el.innerHTML=`<div style="padding:14px;color:#6a6a6a;font-size:11px;text-align:center">Workspace boşdur</div>`;
+    return;
+  }
+  el.innerHTML=entries.map(hex=>{
+    const p=PALETTE.find(x=>x.c===Number(hex));
+    const hidden=hiddenColors.has(Number(hex));
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;color:#ccc;font-size:12px;" onclick="toggleColorVisible(${hex})">
+      <i class="ti ti-cube" style="color:#${Number(hex).toString(16).padStart(6,'0')};font-size:14px"></i>
+      <span style="flex:1">${p?p.n:'Blok'} (${groups[hex]})</span>
+      <i class="ti ${hidden?'ti-eye-off':'ti-eye'}" style="color:#888;font-size:14px"></i>
+    </div>`;
+  }).join('');
+}
+let hiddenColors=new Set();
+function toggleColorVisible(hex){
+  hex=Number(hex);
+  if(hiddenColors.has(hex)) hiddenColors.delete(hex); else hiddenColors.add(hex);
+  blocksMap.forEach(b=>{ if(b.color===hex) b.mesh.visible=!hiddenColors.has(hex); });
+  renderExplorer();
+}
+
+function initWorldEngine(){
+  if(worldRenderer)return;
+  const canvas=document.getElementById('worldCanvas');
+  worldRenderer=new THREE.WebGLRenderer({canvas,antialias:true});
+  worldScene=new THREE.Scene();
+  worldScene.background=new THREE.Color(0x87CEEB);
+  worldScene.fog=new THREE.Fog(0x87CEEB,20,60);
+  worldCamera=new THREE.PerspectiveCamera(70,window.innerWidth/window.innerHeight,0.1,200);
+  worldCamera.rotation.order='YXZ';
+  worldGroup=new THREE.Group();
+  worldScene.add(worldGroup);
+  const amb=new THREE.AmbientLight(0xffffff,0.7); worldScene.add(amb);
+  const dir=new THREE.DirectionalLight(0xffffff,0.6); dir.position.set(10,20,10); worldScene.add(dir);
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(400,400),new THREE.MeshLambertMaterial({color:0x6fae52}));
+  ground.rotation.x=-Math.PI/2; ground.position.y=-0.01; worldScene.add(ground);
+  window.addEventListener('resize',()=>{
+    if(!worldActive)return;
+    worldCamera.aspect=window.innerWidth/window.innerHeight;worldCamera.updateProjectionMatrix();
+    worldRenderer.setSize(window.innerWidth,window.innerHeight);
+  });
+  setupWorldControls(canvas);
+}
+
+function blockKey(x,y,z){return x+','+y+','+z;}
+const sharedBoxGeo=()=>new THREE.BoxGeometry(1,1,1);
+function addBlock(x,y,z,color,skipIfExists){
+  const key=blockKey(x,y,z);
+  if(skipIfExists&&blocksMap.has(key))return;
+  if(blocksMap.has(key)){ // replace color
+    worldGroup.remove(blocksMap.get(key).mesh);
+  }
+  const mesh=new THREE.Mesh(sharedBoxGeo(),new THREE.MeshLambertMaterial({color}));
+  mesh.position.set(x+0.5,y+0.5,z+0.5);
+  worldGroup.add(mesh);
+  blocksMap.set(key,{mesh,color});
+}
+function removeBlock(x,y,z){
+  const key=blockKey(x,y,z);
+  const b=blocksMap.get(key);
+  if(!b)return;
+  worldGroup.remove(b.mesh);
+  blocksMap.delete(key);
+}
+function clearWorldBlocks(){
+  blocksMap.forEach(b=>worldGroup.remove(b.mesh));
+  blocksMap.clear();
+}
+
+function getAimTarget(){
+  const q=worldCamera.quaternion;
+  const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(q);
+  const px=playerPos.x+fwd.x*3, py=playerPos.y+fwd.y*3, pz=playerPos.z+fwd.z*3;
+  return {x:Math.round(px-0.5),y:Math.round(py-0.5),z:Math.round(pz-0.5)};
+}
+function placeOrRemoveBlock(){
+  const t=getAimTarget();
+  if(buildMode==='place') addBlock(t.x,t.y,t.z,selectedBlockColor,true);
+  else removeBlock(t.x,t.y,t.z);
+  if(studioPanelOpen) renderExplorer();
+}
+
+function setupWorldControls(canvas){
+  // joystick
+  const joyBase=document.getElementById('joyBase'), joyStick=document.getElementById('joyStick');
+  function joyHandle(clientX,clientY){
+    const r=joyBase.getBoundingClientRect();
+    const cx=r.left+r.width/2, cy=r.top+r.height/2;
+    let dx=clientX-cx, dy=clientY-cy;
+    const max=r.width/2;
+    const dist=Math.min(Math.hypot(dx,dy),max);
+    const ang=Math.atan2(dy,dx);
+    dx=Math.cos(ang)*dist; dy=Math.sin(ang)*dist;
+    joyStick.style.left=(30+dx)+'px'; joyStick.style.top=(30+dy)+'px';
+    joyVec.x=dx/max; joyVec.y=-dy/max;
+  }
+  joyBase.addEventListener('touchstart',e=>{ e.preventDefault(); joyTouchId=e.changedTouches[0].identifier; joyHandle(e.changedTouches[0].clientX,e.changedTouches[0].clientY); },{passive:false});
+  window.addEventListener('touchmove',e=>{
+    for(const t of e.changedTouches){
+      if(t.identifier===joyTouchId){ joyHandle(t.clientX,t.clientY); }
+      if(t.identifier===lookTouchId){
+        const dx=t.clientX-lookStart.x, dy=t.clientY-lookStart.y;
+        lookMoved+=Math.abs(dx)+Math.abs(dy);
+        yaw-=dx*0.005; pitch=Math.max(-1.3,Math.min(1.3,pitch-dy*0.005));
+        lookStart={x:t.clientX,y:t.clientY};
+      }
+    }
+  },{passive:true});
+  window.addEventListener('touchend',e=>{
+    for(const t of e.changedTouches){
+      if(t.identifier===joyTouchId){ joyTouchId=null; joyVec={x:0,y:0}; joyStick.style.left='30px'; joyStick.style.top='30px'; }
+      if(t.identifier===lookTouchId){ lookTouchId=null; if(lookMoved<10) placeOrRemoveBlock(); }
+    }
+  });
+  canvas.addEventListener('touchstart',e=>{
+    for(const t of e.changedTouches){
+      if(lookTouchId===null && t.identifier!==joyTouchId){
+        lookTouchId=t.identifier; lookStart={x:t.clientX,y:t.clientY}; lookMoved=0;
+      }
+    }
+  },{passive:true});
+  // mouse (desktop)
+  let mouseDown=false,mouseMoved=0,mLast={x:0,y:0};
+  canvas.addEventListener('mousedown',e=>{ mouseDown=true; mouseMoved=0; mLast={x:e.clientX,y:e.clientY}; });
+  window.addEventListener('mousemove',e=>{
+    if(!mouseDown)return;
+    const dx=e.clientX-mLast.x, dy=e.clientY-mLast.y;
+    mouseMoved+=Math.abs(dx)+Math.abs(dy);
+    yaw-=dx*0.004; pitch=Math.max(-1.3,Math.min(1.3,pitch-dy*0.004));
+    mLast={x:e.clientX,y:e.clientY};
+  });
+  window.addEventListener('mouseup',()=>{ if(mouseDown&&mouseMoved<8) placeOrRemoveBlock(); mouseDown=false; });
+  window.addEventListener('keydown',e=>keysDown[e.key.toLowerCase()]=true);
+  window.addEventListener('keyup',e=>keysDown[e.key.toLowerCase()]=false);
+}
+
+function runWorldLoop(){
+  if(!worldActive)return;
+  const q=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,yaw,0,'YXZ'));
+  const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(q);
+  const right=new THREE.Vector3(1,0,0).applyQuaternion(q);
+  let kx=0,ky=0;
+  if(keysDown['w']||keysDown['arrowup'])ky+=1;
+  if(keysDown['s']||keysDown['arrowdown'])ky-=1;
+  if(keysDown['d']||keysDown['arrowright'])kx+=1;
+  if(keysDown['a']||keysDown['arrowleft'])kx-=1;
+  const mx=joyVec.x+kx, my=joyVec.y+ky;
+  const speed=0.11;
+  playerPos.x+=(fwd.x*my+right.x*mx)*speed;
+  playerPos.z+=(fwd.z*my+right.z*mx)*speed;
+  if(keysDown[' '])playerPos.y=Math.min(40,playerPos.y+0.12);
+  if(keysDown['shift'])playerPos.y=Math.max(1,playerPos.y-0.12);
+  worldCamera.position.set(playerPos.x,playerPos.y,playerPos.z);
+  worldCamera.rotation.x=pitch; worldCamera.rotation.y=yaw;
+  worldRenderer.render(worldScene,worldCamera);
+  worldAnimHandle=requestAnimationFrame(runWorldLoop);
+}
+
+function openWorld(id,name,blocks){
+  initWorldEngine();
+  clearWorldBlocks();
+  hiddenColors=new Set();
+  (blocks||[]).forEach(b=>addBlock(b.x,b.y,b.z,b.c));
+  currentWorldId=id; currentWorldName=name;
+  document.getElementById('worldNameLbl').textContent=name;
+  playerPos={x:0,y:3,z:8}; yaw=0; pitch=-0.2; joyVec={x:0,y:0};
+  renderBlockPalette(); setBuildMode('place');
+  studioPanelOpen=false; document.getElementById('studioPanel').style.display='none';
+  document.getElementById('worldScreen').style.display='block';
+  worldRenderer.setSize(window.innerWidth,window.innerHeight);
+  worldCamera.aspect=window.innerWidth/window.innerHeight; worldCamera.updateProjectionMatrix();
+  worldActive=true;
+  runWorldLoop();
+}
+function closeWorld(){
+  worldActive=false;
+  if(worldAnimHandle)cancelAnimationFrame(worldAnimHandle);
+  document.getElementById('worldScreen').style.display='none';
+}
+function openNewWorldPrompt(){
+  const name=prompt('Dünyanın adı:','Mənim dünyam');
+  if(!name)return;
+  openWorld(null,name,[]);
+}
+async function openWorldById(id){
+  try{
+    const r=await fetch(API+'/api/games/'+id);
+    const d=await r.json();
+    if(d.ok) openWorld(d.game.id,d.game.name,d.game.blocks);
+    else showToast('Dünya tapılmadı');
+  }catch(e){showToast('Yüklənmədi');}
+}
+async function saveWorld(){
+  if(!TOKEN){showToast('Zəhmət olmasa giriş edin');return;}
+  const blocks=Array.from(blocksMap.entries()).map(([k,v])=>{const[x,y,z]=k.split(',').map(Number);return{x,y,z,c:v.color};});
+  try{
+    const r=await fetch(API+'/api/games/save',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:TOKEN,id:currentWorldId,name:currentWorldName,blocks})
+    });
+    const d=await r.json();
+    if(d.ok){ currentWorldId=d.game.id; showToast('Dünya yadda saxlanıldı ✅'); loadOybingList(); }
+    else showToast(d.msg||'Xəta');
+  }catch(e){showToast('Şəbəkə xətası');}
+}
+async function loadOybingList(){
+  const el=document.getElementById('oybingList'); if(!el)return;
+  try{
+    const r=await fetch(API+'/api/games');
+    const d=await r.json();
+    if(!d.ok)return;
+    if(d.games.length===0){
+      el.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--txt3)"><i class="ti ti-cube" style="font-size:36px;display:block;margin-bottom:8px"></i>Hələ dünya yoxdur, birincini sən yarat!</div>`;
+      return;
+    }
+    el.innerHTML=d.games.map(g=>`<div onclick="openWorldById('${g.id}')" style="background:var(--bg2);border-radius:14px;padding:14px;cursor:pointer">
+      <div style="height:70px;border-radius:10px;background:linear-gradient(135deg,#4CAF50,#8B5A2B);display:flex;align-items:center;justify-content:center;margin-bottom:8px"><i class="ti ti-cube" style="font-size:28px;color:#fff"></i></div>
+      <div style="color:#fff;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.name}</div>
+      <div style="color:var(--txt3);font-size:11px;margin-top:2px">${g.ownerName} · ${g.blockCount} blok</div>
+    </div>`).join('');
+  }catch(e){}
+}
+
+/* ═══ ZƏNG / VİDEO ZƏNG (WebRTC) ═══ */
+let callSocket=null;
+let pc=null;
+let localStream=null;
+let callPeerPhone=null;
+let callPeerName=null;
+let pendingOffer=null;
+let isVideoCall=false;
+let micOn=true, camOn=true;
+const ICE_SERVERS=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}];
+
+function initCallSocket(){
+  if(callSocket||typeof io==='undefined')return;
+  callSocket=io();
+  callSocket.on('connect',()=>{ if(TOKEN) callSocket.emit('register',TOKEN); });
+  callSocket.on('incoming-call',({fromPhone,offer,isVideo,callerName})=>{
+    if(pc){ // already in a call, auto-decline
+      callSocket.emit('reject-call',{token:TOKEN,toPhone:fromPhone});
+      return;
+    }
+    callPeerPhone=fromPhone;callPeerName=callerName||fromPhone;pendingOffer=offer;isVideoCall=!!isVideo;
+    document.getElementById('incomingCallAvatar').textContent=(callPeerName||'?').slice(0,2).toUpperCase();
+    document.getElementById('incomingCallName').textContent=callPeerName;
+    document.getElementById('incomingCallType').textContent=isVideoCall?'Video zəng gəlir...':'Səsli zəng gəlir...';
+    document.getElementById('incomingCallModal').style.display='flex';
+  });
+  callSocket.on('call-answered',async({answer})=>{
+    document.getElementById('callStatusText').textContent='Bağlanıldı';
+    if(pc) await pc.setRemoteDescription(new RTCSessionDescription(answer));
+  });
+  callSocket.on('ice-candidate',async({candidate})=>{
+    try{ if(pc&&candidate) await pc.addIceCandidate(new RTCIceCandidate(candidate)); }catch(e){}
+  });
+  callSocket.on('call-rejected',()=>{ showToast('Zəng rədd edildi'); endCallCleanup(); });
+  callSocket.on('call-ended',()=>{ showToast('Zəng bitdi'); endCallCleanup(); });
+  callSocket.on('call-failed',()=>{ showToast('İstifadəçi onlayn deyil'); endCallCleanup(); });
+}
+
+function createPeerConnection(toPhone){
+  const conn=new RTCPeerConnection({iceServers:ICE_SERVERS});
+  conn.onicecandidate=(e)=>{
+    if(e.candidate) callSocket.emit('ice-candidate',{token:TOKEN,toPhone,candidate:e.candidate});
+  };
+  conn.ontrack=(e)=>{
+    document.getElementById('remoteVideo').srcObject=e.streams[0];
+  };
+  return conn;
+}
+
+async function startCall(isVideo){
+  if(curFriend===null)return;
+  if(!callSocket){ showToast('Qoşulma hazır deyil, bir az gözləyin'); return; }
+  const f=FRIENDS[curFriend];
+  callPeerPhone=f.phone;callPeerName=f.name;isVideoCall=isVideo;
+  try{
+    localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:isVideo});
+  }catch(e){ showToast('Mikrofon/kamera icazəsi lazımdır'); return; }
+  document.getElementById('localVideo').srcObject=localStream;
+  document.getElementById('localVideo').style.display=isVideo?'block':'none';
+  document.getElementById('callStatusText').textContent='Zəng edilir...';
+  document.getElementById('activeCallScreen').style.display='flex';
+  pc=createPeerConnection(callPeerPhone);
+  localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));
+  const offer=await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  callSocket.emit('call-user',{token:TOKEN,toPhone:callPeerPhone,offer,isVideo,callerName:myName});
+}
+
+async function acceptIncomingCall(){
+  document.getElementById('incomingCallModal').style.display='none';
+  try{
+    localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:isVideoCall});
+  }catch(e){ showToast('Mikrofon/kamera icazəsi lazımdır'); callSocket.emit('reject-call',{token:TOKEN,toPhone:callPeerPhone}); return; }
+  document.getElementById('localVideo').srcObject=localStream;
+  document.getElementById('localVideo').style.display=isVideoCall?'block':'none';
+  document.getElementById('callStatusText').textContent='Bağlanıldı';
+  document.getElementById('activeCallScreen').style.display='flex';
+  pc=createPeerConnection(callPeerPhone);
+  localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));
+  await pc.setRemoteDescription(new RTCSessionDescription(pendingOffer));
+  const answer=await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  callSocket.emit('answer-call',{token:TOKEN,toPhone:callPeerPhone,answer});
+}
+
+function declineIncomingCall(){
+  document.getElementById('incomingCallModal').style.display='none';
+  if(callSocket&&callPeerPhone) callSocket.emit('reject-call',{token:TOKEN,toPhone:callPeerPhone});
+  callPeerPhone=null;pendingOffer=null;
+}
+
+function hangupCall(){
+  if(callSocket&&callPeerPhone) callSocket.emit('end-call',{token:TOKEN,toPhone:callPeerPhone});
+  endCallCleanup();
+}
+
+function endCallCleanup(){
+  if(pc){ pc.close(); pc=null; }
+  if(localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
+  document.getElementById('activeCallScreen').style.display='none';
+  document.getElementById('incomingCallModal').style.display='none';
+  document.getElementById('remoteVideo').srcObject=null;
+  document.getElementById('localVideo').srcObject=null;
+  callPeerPhone=null;pendingOffer=null;micOn=true;camOn=true;
+}
+
+function toggleCallMic(){
+  if(!localStream)return;
+  micOn=!micOn;
+  localStream.getAudioTracks().forEach(t=>t.enabled=micOn);
+  document.getElementById('callMicIcon').className=micOn?'ti ti-microphone':'ti ti-microphone-off';
+}
+function toggleCallCam(){
+  if(!localStream)return;
+  camOn=!camOn;
+  localStream.getVideoTracks().forEach(t=>t.enabled=camOn);
+  document.getElementById('callCamIcon').className=camOn?'ti ti-video':'ti ti-video-off';
+}
+
 /* ═══ INIT ═══ */
 (async function init(){
+  applyTranslations();
   // Auto-login if token saved
   if(TOKEN){
     try{
